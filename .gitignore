@@ -1,0 +1,17 @@
+# Python virtualenvs (create your own — see README)
+.venv/
+venv/
+env/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# CTF byproduct (harmless command-injection proof target)
+**/proof.txt
+
+# OS / editor cruft
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,4 @@
+grocery list
+- coffee
+- oat milk
+- a second file so list_workspace() has more than one thing to show
