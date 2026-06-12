@@ -47,6 +47,8 @@ Task 1's core objective.
 
 NEXT — the hand-edit beat (do this by hand, no agent writing it):
 Open my_masterschool_mcp_server.py and add a SECOND tool, list_workspace(),
-that returns the filenames in this folder. The ONLY thing that turns a
-plain function into a tool is: a function + @mcp.tool() + a docstring.
+that returns the files in the workspace/ folder (return each as
+"workspace/<name>" so it scopes to the sandbox and the results can be passed
+straight to read_workspace_file). The ONLY thing that turns a plain function
+into a tool is: a function + @mcp.tool() + a docstring.
 Reconnect the server, then ask your agent to call your new tool.

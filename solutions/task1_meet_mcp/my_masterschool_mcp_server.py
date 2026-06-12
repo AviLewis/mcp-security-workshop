@@ -26,10 +26,12 @@ def read_workspace_file(path: str) -> str:
 
 @mcp.tool()  # <-- the ONLY thing that makes list_workspace discoverable
 def list_workspace() -> list[str]:
-    """List the filenames in the server's current working directory."""
+    """List the files in the workspace/ folder."""
     sys.stderr.write("[tool call] list_workspace()\n")
     sys.stderr.flush()
-    return sorted(os.listdir("."))
+    # Scope to the workspace/ sandbox (not the server's own folder), and return
+    # workspace/<name> so each result can be passed straight to read_workspace_file.
+    return sorted(f"workspace/{name}" for name in os.listdir("workspace"))
 
 
 if __name__ == "__main__":

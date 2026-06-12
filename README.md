@@ -92,9 +92,11 @@ the server runs it → the result returns to the agent's context.*
    that just delivered it to you**. The text coming back *is* your proof the loop ran end-to-end
    (Claude Code also shows the tool call in its interface).
 4. **Hand-edit (no agent writes this):** open the server and add a second tool `list_workspace()`
-   that returns the filenames in the folder. The whole recipe: a function + `@mcp.tool()` + a
-   docstring. You do **not** re-register — the file path didn't change; Claude Code just needs to
-   relaunch the server so it re-discovers the tools:
+   that returns the files in the **`workspace/` folder** — scope it to the sandbox, e.g.
+   `return sorted(f"workspace/{n}" for n in os.listdir("workspace"))`, so it doesn't list the
+   server's own source and each result is ready to hand to `read_workspace_file`. The whole recipe:
+   a function + `@mcp.tool()` + a docstring. You do **not** re-register — the file path didn't
+   change; Claude Code just needs to relaunch the server so it re-discovers the tools:
    ```
    # Reconnect so the new tool is picked up — pick ONE:
    #   (a) exit Claude Code (Ctrl-C / Ctrl-D) and start a new session:  claude
