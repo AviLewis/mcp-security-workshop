@@ -8,11 +8,12 @@ This connects to a streamable-HTTP MCP server (yours, or a partner's) and:
      "your workspace" means; it reads whatever the server PROCESS can read.
 
 Start the server first (in another terminal):
-    python mcp_server_http.py
+    python my_masterschool_mcp_server.py
 
 Then run this:
-    python client_http_demo.py                          # talks to localhost
-    python client_http_demo.py http://<PARTNER-IP>:8000/mcp   # talks to a partner's box
+    python client_http_demo.py                              # talks to localhost
+    python client_http_demo.py https://<rand>.trycloudflare.com/mcp   # talks to a tunneled box
+    python client_http_demo.py http://<PARTNER-LAN-IP>:8000/mcp       # LAN fallback
 """
 import asyncio
 import sys

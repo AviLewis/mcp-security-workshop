@@ -1,4 +1,52 @@
-grocery list
-- coffee
-- oat milk
-- a second file so list_workspace() has more than one thing to show
+============================================================
+HOW DID THIS TEXT REACH YOU?  (Task 1 — the MCP loop, explained)
+============================================================
+
+You're reading this because you asked your agent to read
+`workspace/notes.txt` through the MCP server you registered
+(my_masterschool_mcp_server). Reading this file IS the lesson.
+Here is exactly what just happened, step by step:
+
+1. DISCOVERY
+   When you ran `claude mcp add ... my_masterschool_mcp_server` and opened
+   /mcp, Claude Code (the HOST) started a CLIENT that connected to your
+   SERVER and asked: "what tools do you have?"  Your server replied with
+   its tool list — `read_workspace_file` was on it.
+   It is discoverable for ONE reason: the @mcp.tool() decorator sitting
+   above the function in my_masterschool_mcp_server.py. Delete that line
+   and the tool vanishes from this list.
+
+2. PICK
+   You typed something like "read workspace/notes.txt". The agent matched
+   that intent to the `read_workspace_file` tool it discovered in step 1.
+
+3. INVOKE
+   The client called your tool with arguments:
+       read_workspace_file(path="workspace/notes.txt")
+   You never ran any Python yourself — Claude Code launched the server and made
+   this call for you. (Claude Code shows the tool call in its interface; the
+   server also logs a line like  [tool call] read_workspace_file(...)  to its
+   stderr, which Claude Code captures in its MCP logs.)
+
+4. RUN
+   Your server's function executed `open(path).read()` and returned these
+   exact bytes.
+
+5. RESULT
+   Those bytes traveled back through the client into the agent's context —
+   which is why you are reading them right now.
+
+------------------------------------------------------------
+THE LOOP, in one breath:
+   your prompt -> client lists tools -> agent picks one ->
+   client invokes it -> server runs it -> result back in context.
+
+If you can narrate those five steps without looking, you have mastered
+Task 1's core objective.
+------------------------------------------------------------
+
+NEXT — the hand-edit beat (do this by hand, no agent writing it):
+Open my_masterschool_mcp_server.py and add a SECOND tool, list_workspace(),
+that returns the filenames in this folder. The ONLY thing that turns a
+plain function into a tool is: a function + @mcp.tool() + a docstring.
+Reconnect the server, then ask your agent to call your new tool.

@@ -1,4 +1,4 @@
-# mcp_server.py — read every line; understand it before you run it.
+# my_masterschool_mcp_server.py — read every line; understand it before you run it.
 #
 # This is the Task 1 starter. You will NOT generate it with an agent — you read it,
 # run it, and change it by hand. It exposes ONE tool over the stdio transport.
@@ -8,11 +8,13 @@ import os
 import sys
 
 # A stdio server inherits the cwd of whatever LAUNCHES it (your shell, Claude Code, ...).
-# Anchor to this file's own folder so "workspace/README.md" resolves the same way no matter
+# Anchor to this file's own folder so "workspace/notes.txt" resolves the same way no matter
 # who starts the server — without this, /mcp would resolve relative paths against your shell's cwd.
 os.chdir(Path(__file__).resolve().parent)
 
-mcp = FastMCP("my-server")  # the SERVER object the host will connect to
+mcp = FastMCP(
+    "my_masterschool_mcp_server"
+)  # the SERVER object the host will connect to
 
 
 @mcp.tool()  # this decorator is what makes the function DISCOVERABLE

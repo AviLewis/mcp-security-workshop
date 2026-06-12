@@ -17,8 +17,9 @@ Hands-on starter kit for the **MCP & Security** workshop. You'll build a real MC
 ## What's here
 
 ```
-task1_meet_mcp/     ← Task 1 starter: a ~20-line MCP server with one tool
-task2_network/      ← Task 2 fixtures: you add the HTTP transport yourself
+task1_meet_mcp/     ← Task 1 starter: my_masterschool_mcp_server.py (one tool) + a
+                       workspace/notes.txt that explains the MCP loop when you read it
+task2_network/      ← Task 2 fixtures: you add the HTTP transport + tunnel yourself
 task3_security/     ← Task 3 CTF: a vulnerable server to attack, then harden
 solutions/          ← ⛔ SPOILERS — the finished, runnable version of all three tasks
 ```
@@ -53,61 +54,82 @@ Keep this venv activated for the rest of the workshop (so `python` and `claude m
 *your prompt → client lists tools → agent picks one → client invokes it with arguments →
 the server runs it → the result returns to the agent's context.*
 
-1. **Read** `task1_meet_mcp/mcp_server.py` line by line. Find the `@mcp.tool()` decorator —
-   that one line is what makes a plain function *discoverable* by an agent.
-2. **See the loop** without Claude Code — a tiny client prints every step:
+1. **Read** `task1_meet_mcp/my_masterschool_mcp_server.py` line by line. Find the `@mcp.tool()`
+   decorator — that one line is what makes a plain function *discoverable* by an agent.
+2. **Register it with your own Claude Code agent:**
    ```bash
-   cd task1_meet_mcp
-   python client_demo.py
-   ```
-   Watch the `[tool call]` line: that's your server being invoked, live.
-3. **Connect your own agent.** Register the server with Claude Code:
-   ```bash
-   # from inside task1_meet_mcp, with the venv activated:
-   claude mcp add --transport stdio my-server -- "$(which python)" "$(pwd)/mcp_server.py"
+   cd task1_meet_mcp                 # venv activated
+   claude mcp add --transport stdio my_masterschool_mcp_server -- \
+     "$(which python)" "$(pwd)/my_masterschool_mcp_server.py"
    claude mcp list
-   # then inside Claude Code:  /mcp   and:  "Use read_workspace_file to read workspace/README.md"
    ```
-4. **Hand-edit (no agent):** add a second tool `list_workspace()` that returns the filenames in
-   the folder. Pattern: a function + `@mcp.tool()` + a docstring. Re-run `python client_demo.py`
-   — it will discover and call your new tool automatically.
+3. **Test it entirely from inside the agent** — you never run the Python file yourself; Claude
+   Code launches it for you. In Claude Code:
+   ```
+   /mcp                                         # confirm the tool was discovered
+   "Use read_workspace_file to read workspace/notes.txt"
+   ```
+   `notes.txt` doesn't contain notes — it contains a **step-by-step explanation of the very loop
+   that just delivered it to you**. The text coming back *is* your proof the loop ran end-to-end
+   (Claude Code also shows the tool call in its interface).
+4. **Hand-edit (no agent writes this):** open the server and add a second tool `list_workspace()`
+   that returns the filenames in the folder. The whole recipe: a function + `@mcp.tool()` + a
+   docstring. Reconnect the server, then ask your agent to call your new tool.
 
 > **cwd note:** a stdio server inherits the working directory of whatever launches it. This
-> starter calls `os.chdir(Path(__file__).resolve().parent)` so relative paths like
-> `workspace/README.md` resolve no matter who starts it. (Same truth as Task 2's boundary: a
-> tool reads with the *process's* view of the filesystem.)
+> server calls `os.chdir(Path(__file__).resolve().parent)` so `workspace/notes.txt` resolves no
+> matter who starts it. (Same truth as Task 2's boundary: a tool reads with the *process's* view
+> of the filesystem, not your idea of "the workspace.")
 
-✅ **Checkpoint:** your agent calls your tool, your hand-added tool works, and you can narrate the
-discovery→invoke loop without notes.
+✅ **Checkpoint:** your agent reads `notes.txt`, your hand-added `list_workspace` tool works, and
+you can narrate the discovery→invoke loop without notes.
 
 ---
 
-## Task 2 — Expose it on the network (streamable HTTP)
+## Task 2 — Expose it on the public internet (streamable HTTP + tunnel)
 
-**Goal (🔍 master this):** the moment your server is on the network, its tools are reachable by
-*someone else's* agent — and the server has no idea what "your workspace" means. It reads
-whatever the **process** can read.
+**Goal (🔍 master this):** the moment your server is reachable off your machine, its tools are
+callable by *someone else's* agent — and the server has no idea what "your workspace" means. It
+reads whatever the **process** can read. We use a **tunnel** (not the LAN) so this works through
+any firewall/NAT — and so the boundary is honest: your file-reader is now on the *public internet*.
 
-1. **Swap the transport** (agent-assisted is fine here — this is "gist" level). Ask your agent:
-   > "Change my MCP server to **streamable HTTP** on host `0.0.0.0`, port `8000`, served at
-   > `/mcp`. Tell me my LAN IP and the exact URL a teammate on the same WiFi would use."
+1. **Swap the transport** (agent-assisted is fine — "gist" level). Ask your agent:
+   > "Change my MCP server to **streamable HTTP** on host `0.0.0.0`, port `8000`, served at `/mcp`."
 
-   The key change is `FastMCP(..., host="0.0.0.0", port=8000)` + `mcp.run(transport="streamable-http")`,
-   served at `http://<LAN-IP>:8000/mcp`.
-2. **Read the one line that changed** and explain *why* it moves you from "local subprocess" to
-   "anyone on the WiFi." If you can't, you don't understand the transport yet — ask.
-3. **Cross-connect a partner** (or simulate with localhost):
+   The change is `FastMCP(..., host="0.0.0.0", port=8000)` + `mcp.run(transport="streamable-http")`.
+   Start it: `python my_masterschool_mcp_server.py` (leave it running).
+
+2. **Expose it with a tunnel** (default path — pick one; all give you a public HTTPS URL):
    ```bash
-   claude mcp add --transport http partner-box http://<PARTNER-LAN-IP>:8000/mcp
-   # inside Claude Code:  "Use read_workspace_file on partner-box to read workspace/README.md"
+   cloudflared tunnel --url http://localhost:8000      # no signup → https://<rand>.trycloudflare.com
+   # or:  ngrok http 8000                              # free authtoken → https://<rand>.ngrok-free.app
+   # or:  npx localtunnel --port 8000                  # no signup → https://<rand>.loca.lt
    ```
+
+3. **A partner connects to your tunnel URL — note the `/mcp` path:**
+   ```bash
+   claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
+   # inside Claude Code:  "Use read_workspace_file on partner-box to read workspace/notes.txt"
+   ```
+
 4. **The reveal:** a planted `task2_network/fake.env` (fake secret) is readable too. Predict
-   whether your partner's agent can read it, then try. It can.
+   whether your partner's agent can read it, then have them try. It can.
 
-> 🛑 **Stop the server** when you're done — don't leave a file-reader bound to `0.0.0.0`.
+> 🔍 **Why the tunnel "just works" — and the trap.** Binding `host="0.0.0.0"` *also turns off*
+> the MCP SDK's **DNS-rebinding protection**, so the server accepts requests with *any* `Host`
+> header — including your tunnel's domain. If you "harden" by switching to `host="127.0.0.1"`,
+> the SDK only allows a `localhost` Host and your tunnel dies with **`421 Misdirected Request`** —
+> a *security control* that looks exactly like a network bug. Convenience vs. safety, in one line.
 
-✅ **Checkpoint:** you read a file on another machine **and** can state in one sentence the
-boundary you crossed.
+> 🛑 **Stop the server and the tunnel** when you're done — don't leave a file-reader exposed to
+> the internet.
+
+**LAN fallback** (if you can't tunnel and you're on the same WiFi with no client isolation): the
+server prints your LAN IP on startup; a partner uses `http://<YOUR-LAN-IP>:8000/mcp`. To rehearse
+solo, run `python solutions/task2_network/client_http_demo.py http://127.0.0.1:8000/mcp`.
+
+✅ **Checkpoint:** a partner's agent read a file on your machine **and** you can state in one
+sentence the boundary you crossed.
 
 ---
 

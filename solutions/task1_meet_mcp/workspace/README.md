@@ -1,10 +1,8 @@
-# Sample Workspace (Task 1)
+# Task 1 workspace
 
-This file exists so `read_workspace_file` has something real to return.
+A second file so `list_workspace()` (the tool you add by hand) has more than one
+thing to list.
 
-When the agent reads this, the bytes you're looking at now travel back through the
-MCP loop and land in the agent's context. That round trip — prompt to bytes-in-context —
-is the whole point of Task 1.
-
-Try editing this line, then re-run the client. The change shows up immediately because
-the tool reads the file fresh on every call.
+The real lesson is in **`notes.txt`** — read THAT through your MCP server
+(`read_workspace_file`) and its contents will explain, step by step, how the read
+you just performed actually happened.

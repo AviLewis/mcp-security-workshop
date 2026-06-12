@@ -1,6 +1,6 @@
-# mcp_server_extended.py — the result of the Task 1 "hand-edit" beat.
+# my_masterschool_mcp_server.py (SOLUTION) — the result of the Task 1 "hand-edit" beat.
 #
-# Same as mcp_server.py, but with ONE tool added BY HAND: list_workspace().
+# Same as the Task 1 starter, but with ONE tool added BY HAND: list_workspace().
 # This is the "you just extended an MCP server yourself" moment. Notice the pattern:
 # a plain Python function + the @mcp.tool() decorator + a docstring == a new tool the
 # agent can discover and call. Nothing else changes.
@@ -13,7 +13,7 @@ import os
 # (your shell, Claude Code's /mcp, ...). A stdio server otherwise inherits the launcher's cwd.
 os.chdir(Path(__file__).resolve().parent)
 
-mcp = FastMCP("my-server")
+mcp = FastMCP("my_masterschool_mcp_server")
 
 
 @mcp.tool()
