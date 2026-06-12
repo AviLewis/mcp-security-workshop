@@ -11,8 +11,8 @@ Each task folder is self-contained and runnable (with the venv from the repo roo
 
 # Task 1 — register the completed server (with the hand-added list_workspace tool), then in
 #          Claude Code:  /mcp  and  "read workspace/notes.txt"  (the file explains the loop).
-cd solutions/task1_meet_mcp
-claude mcp add --transport stdio my_masterschool_mcp_server -- "$(which python)" "$(pwd)/my_masterschool_mcp_server.py"
+#          Run from the repo root; note the full path including solutions/task1_meet_mcp/.
+claude mcp add --transport stdio my_masterschool_mcp_server -- "$(which python)" "$(pwd)/solutions/task1_meet_mcp/my_masterschool_mcp_server.py"
 
 # Task 2 — HTTP transport + a "peer" client reading your files (two terminals)
 cd solutions/task2_network && python my_masterschool_mcp_server.py    # terminal A (then tunnel it)

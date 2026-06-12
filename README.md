@@ -65,13 +65,15 @@ the server runs it → the result returns to the agent's context.*
 
 1. **Read** `task1_meet_mcp/my_masterschool_mcp_server.py` line by line. Find the `@mcp.tool()`
    decorator — that one line is what makes a plain function *discoverable* by an agent.
-2. **Register it with your own Claude Code agent:**
+2. **Register it with your own Claude Code agent.** Run this **from the repo root** (where setup
+   left you) — note the `task1_meet_mcp/` in the path, and keep the venv activated:
    ```bash
-   cd task1_meet_mcp                 # venv activated
    claude mcp add --transport stdio my_masterschool_mcp_server -- \
-     "$(which python)" "$(pwd)/my_masterschool_mcp_server.py"
+     "$(which python)" "$(pwd)/task1_meet_mcp/my_masterschool_mcp_server.py"
    claude mcp list
    ```
+   > Registered from the wrong folder and `claude mcp list` shows a path without `task1_meet_mcp/`?
+   > Run `claude mcp remove my_masterschool_mcp_server` and re-run the command above from the repo root.
 3. **Test it entirely from inside the agent** — you never run the Python file yourself; Claude
    Code launches it for you. In Claude Code:
    ```
