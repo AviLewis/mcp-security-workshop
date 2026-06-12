@@ -72,6 +72,14 @@ the server runs it → the result returns to the agent's context.*
      "$(which python)" "$(pwd)/task1_meet_mcp/my_masterschool_mcp_server.py"
    claude mcp list
    ```
+   What each part means:
+   - `claude mcp add` — register a new MCP server in your Claude Code config.
+   - `--transport stdio` — run it as a local subprocess, talking over stdin/stdout.
+   - `my_masterschool_mcp_server` — the name it shows up as in `/mcp`.
+   - `--` — everything after this is the command Claude Code runs to launch the server:
+     `$(which python)` = the venv Python that has `mcp`; `$(pwd)/…/…py` = the absolute path to
+     the server file. Both are absolute so Claude Code can launch it from anywhere.
+
    > Registered from the wrong folder and `claude mcp list` shows a path without `task1_meet_mcp/`?
    > Run `claude mcp remove my_masterschool_mcp_server` and re-run the command above from the repo root.
 3. **Test it entirely from inside the agent** — you never run the Python file yourself; Claude
