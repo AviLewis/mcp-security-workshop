@@ -9,8 +9,7 @@ from mcp.server.fastmcp import FastMCP
 import sys
 import os
 
-# Anchor to this file's folder so relative paths work no matter who launches the server
-# (your shell, Claude Code's /mcp, ...). A stdio server otherwise inherits the launcher's cwd.
+# Set the current working directory to this file's folder so relative paths resolve.
 os.chdir(Path(__file__).resolve().parent)
 
 mcp = FastMCP("my_masterschool_mcp_server")

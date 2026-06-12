@@ -1,15 +1,13 @@
 # my_masterschool_mcp_server.py — read every line; understand it before you run it.
 #
 # This is the Task 1 starter. You will NOT generate it with an agent — you read it,
-# run it, and change it by hand. It exposes ONE tool over the stdio transport.
+# run it, and change it. It exposes ONE tool over the stdio transport.
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 import os
 import sys
 
-# A stdio server inherits the cwd of whatever LAUNCHES it (your shell, Claude Code, ...).
-# Anchor to this file's own folder so "workspace/notes.txt" resolves the same way no matter
-# who starts the server — without this, /mcp would resolve relative paths against your shell's cwd.
+# Set the current working directory to this file's folder so relative paths resolve.
 os.chdir(Path(__file__).resolve().parent)
 
 mcp = FastMCP(

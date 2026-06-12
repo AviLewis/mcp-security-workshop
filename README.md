@@ -46,6 +46,15 @@ python -c "import mcp; print('mcp ready')"
 
 Keep this venv activated for the rest of the workshop (so `python` and `claude mcp` use it).
 
+**Why each step is here:**
+- **`git clone` + `cd`** — download the files and move into the project folder so the relative paths in later commands resolve.
+- **`python3 -m venv .venv`** — create an isolated Python environment. Modern systems (macOS/Homebrew, Debian/Ubuntu, Python 3.11+) **block installing packages into the system Python** (the `externally-managed-environment` error), so a virtual environment is the reliable way to install dependencies without a sudo/permission fight or breaking your system Python.
+- **`source .venv/bin/activate`** — switch into that environment so `python`, `pip`, and `which python` all point inside it. (Task 1 registers the server with `"$(which python)"`, so this guarantees Claude Code launches it with the interpreter that has `mcp` installed.)
+- **`pip install -r requirements.txt`** — installs the one dependency that matters: the **`mcp` SDK** that every server imports (`from mcp...`). Nothing runs without it.
+- **`python -c "import mcp; ..."`** — a quick sanity check that the install worked before you wire up Claude Code.
+
+> The bare minimum is really just *"have the files"* + *"have a Python with `mcp` installed."* The venv steps exist because a plain `pip install mcp` fails on most modern machines.
+
 ---
 
 ## Task 1 — Meet MCP by hand (stdio, local)
@@ -76,10 +85,11 @@ the server runs it → the result returns to the agent's context.*
    that returns the filenames in the folder. The whole recipe: a function + `@mcp.tool()` + a
    docstring. Reconnect the server, then ask your agent to call your new tool.
 
-> **cwd note:** a stdio server inherits the working directory of whatever launches it. This
-> server calls `os.chdir(Path(__file__).resolve().parent)` so `workspace/notes.txt` resolves no
-> matter who starts it. (Same truth as Task 2's boundary: a tool reads with the *process's* view
-> of the filesystem, not your idea of "the workspace.")
+> **Current working directory (cwd) note:** a stdio server inherits the *current working
+> directory* — the folder a process resolves relative paths against — of whatever launches it.
+> This server calls `os.chdir(Path(__file__).resolve().parent)` so `workspace/notes.txt` resolves
+> no matter who starts it. (Same truth as Task 2's boundary: a tool reads with the *process's*
+> view of the filesystem, not your idea of "the workspace.")
 
 ✅ **Checkpoint:** your agent reads `notes.txt`, your hand-added `list_workspace` tool works, and
 you can narrate the discovery→invoke loop without notes.
