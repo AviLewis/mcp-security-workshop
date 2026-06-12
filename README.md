@@ -93,7 +93,19 @@ the server runs it → the result returns to the agent's context.*
    (Claude Code also shows the tool call in its interface).
 4. **Hand-edit (no agent writes this):** open the server and add a second tool `list_workspace()`
    that returns the filenames in the folder. The whole recipe: a function + `@mcp.tool()` + a
-   docstring. Reconnect the server, then ask your agent to call your new tool.
+   docstring. You do **not** re-register — the file path didn't change; Claude Code just needs to
+   relaunch the server so it re-discovers the tools:
+   ```
+   # Reconnect so the new tool is picked up — pick ONE:
+   #   (a) exit Claude Code (Ctrl-C / Ctrl-D) and start a new session:  claude
+   #   (b) inside Claude Code:  /mcp  → select my_masterschool_mcp_server → Reconnect
+
+   # Then confirm it and call your new tool — in Claude Code:
+   /mcp                                  # list_workspace should now appear (two tools)
+   "Use list_workspace to show the files in the workspace"
+   ```
+   (If `/mcp` still shows only one tool after reconnecting, your `@mcp.tool()` decorator or the
+   docstring is missing — that's the usual cause.)
 
 > **Current working directory (cwd) note:** a stdio server inherits the *current working
 > directory* — the folder a process resolves relative paths against — of whatever launches it.
