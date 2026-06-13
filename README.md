@@ -136,11 +136,21 @@ callable by *someone else's* agent — and the server has no idea what "your wor
 reads whatever the **process** can read. We use a **tunnel** (not the LAN) so this works through
 any firewall/NAT — and so the boundary is honest: your file-reader is now on the *public internet*.
 
-1. **Swap the transport** (agent-assisted is fine — "gist" level). Ask your agent:
+1. **Reuse your Task 1 server, then swap its transport** (agent-assisted is fine — "gist" level).
+   The server you put on the network is the **same file-reading server you built in Task 1**
+   (`read_workspace_file` + `list_workspace`) — you're only changing how it's reached. Copy it next
+   to the Task 2 fixtures so the planted files are in its scope, then change the transport:
+   ```bash
+   cp task1_meet_mcp/my_masterschool_mcp_server.py task2_network/
+   cd task2_network
+   ```
+   Ask your agent:
    > "Change my MCP server to **streamable HTTP** on host `0.0.0.0`, port `8000`, served at `/mcp`."
 
    The change is `FastMCP(..., host="0.0.0.0", port=8000)` + `mcp.run(transport="streamable-http")`.
-   Start it: `python my_masterschool_mcp_server.py` (leave it running).
+   Start it from `task2_network/`: `python my_masterschool_mcp_server.py` (leave it running). Because
+   the server `os.chdir`s to its own folder, "the workspace" is now `task2_network/` — so a remote
+   agent reaches `workspace/README.md` (a normal file) **and** `fake.env` (the planted secret).
 
    > **What you're actually doing:** same server, same tools — you're only swapping the *transport*
    > (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
@@ -167,9 +177,9 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
    > **On the same Wi-Fi? You may not need a tunnel at all.** If you and your partner are on the
    > same network and it doesn't block device-to-device traffic (no client/AP "isolation"), your
    > server is already reachable directly: it binds `0.0.0.0:8000`, so a partner connects over the
-   > LAN with the **same HTTP transport** — no tunnel tool required. The server prints your LAN URL
-   > on startup (or run `ipconfig getifaddr en0` on macOS Wi-Fi); the partner uses
-   > `http://<YOUR-LAN-IP>:8000/mcp` in the next step. A tunnel is only needed to cross networks —
+   > LAN with the **same HTTP transport** — no tunnel tool required. Find your LAN IP with
+   > `ipconfig getifaddr en0` (macOS Wi-Fi); the partner uses `http://<YOUR-LAN-IP>:8000/mcp` in the
+   > next step. A tunnel is only needed to cross networks —
    > NAT, firewalls, or to hand out a truly public URL.
 
 3. **A partner connects to your URL** — the tunnel URL **or** your `http://<LAN-IP>:8000` on the
@@ -177,7 +187,7 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
    ```bash
    claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
    # same network instead?  claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
-   # inside Claude Code:  "Use read_workspace_file on partner-box to read workspace/notes.txt"
+   # inside Claude Code:  "Use read_workspace_file on partner-box to read workspace/README.md"
    ```
 
 4. **The reveal:** a planted `task2_network/fake.env` (fake secret) is readable too. Predict
