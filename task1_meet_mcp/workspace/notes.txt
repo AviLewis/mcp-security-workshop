@@ -16,6 +16,20 @@ Here is exactly what just happened, step by step:
    above the function in my_masterschool_mcp_server.py. Delete that line
    and the tool vanishes from this list.
 
+   • WHAT THAT "CLIENT" IS: not an app you launched. It's an internal
+     connector object the HOST (Claude Code) creates, ONE per server
+     (1:1 — three `claude mcp add`s => three clients). For this one
+     server, that client:
+         - SPAWNED `python my_masterschool_mcp_server.py` as a child
+           subprocess (that's why you never ran Python);
+         - WIRED to its stdin/stdout — that pipe IS the connection;
+         - HANDSHAKED: `initialize`, then `tools/list` (the call
+           behind the "what tools do you have?" above);
+         - later INVOKED with `tools/call`.
+     All of it is JSON-RPC 2.0 over that pipe. (In everyday speech a
+     "client" is a chat app like Cursor; in MCP that whole app is the
+     HOST — the real client is this per-server connector inside it.)
+
 2. PICK
    You typed something like "read workspace/notes.txt". The agent matched
    that intent to the `read_workspace_file` tool it discovered in step 1.
