@@ -171,6 +171,14 @@ machine's agent.
    > path the protocol is served at. That's also why *you* start it now and leave it running — with
    > stdio, Claude Code launched it on demand.
 
+   > **🩺 Ran it and it just sits there blank — or a client says "unable to connect" to `:8000`?**
+   > You're still running the **stdio** server (`mcp.run()` with no args): stdio prints nothing and
+   > opens **no port**, so there's nothing on 8000 to connect to. Make the swap above
+   > (`host="0.0.0.0", port=8000` + `transport="streamable-http"`) — the HTTP server instead prints
+   > `INFO: Uvicorn running on http://0.0.0.0:8000` and stays listening. Confirm it's actually up with
+   > `lsof -nP -iTCP:8000 -sTCP:LISTEN` (should show your `python`). Stray blank stdio servers you
+   > started by hand do nothing useful — clear leftovers with `pkill -f my_masterschool_mcp_server`.
+
 2. **Expose it — default to your local Wi-Fi network.** Both paths below serve the same `/mcp` over
    the same HTTP transport, but **(a) the local network is the default for this workshop** — simplest,
    no extra tools. Use **(b) a tunnel** only if you and your partner aren't on the same network.
