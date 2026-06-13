@@ -115,7 +115,7 @@ the server runs it → the result returns to the agent's context.*
    (Claude Code also shows the tool call in its interface).
 4. **Add your own tools by hand.** This is the "you can extend the server yourself" beat — write
    two tools, each just a function + `@mcp.tool()` + a docstring:
-   - **`name()`** — returns *your* name (e.g. `return "Ada Lovelace"`). The simplest possible tool,
+   - **`name()`** — returns *your* name (e.g. `return "Guy Cohen"`). The simplest possible tool,
      and it makes the server uniquely yours — in Task 2 a partner calls it to confirm they reached
      *your* machine.
    - **`list_workspace()`** — returns the files in the `workspace/` folder (a tool that does real
@@ -152,10 +152,14 @@ machine's agent.
    > "Change my MCP server to **streamable HTTP** on host `0.0.0.0`, port `8000`, served at `/mcp`."
 
    The change is `FastMCP(..., host="0.0.0.0", port=8000)` + `mcp.run(transport="streamable-http")`.
-   Start it (it `os.chdir`s to its own folder, so run it from anywhere):
-   `python server/my_masterschool_mcp_server.py` — leave it running. "The workspace" stays `server/`,
-   so a remote agent reaches `workspace/README.md` (a normal file) **and** `fake.env` (the planted
-   secret that `list_workspace` never shows).
+   Then **run the server and leave it running in its own terminal** (it `os.chdir`s to its own
+   folder, so launch it from anywhere):
+   ```bash
+   python server/my_masterschool_mcp_server.py     # prints its URLs; Ctrl-C to stop when done
+   ```
+   It keeps running and listening — *this* is the process a partner (or you) connects to in steps 2–3.
+   "The workspace" stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file)
+   **and** `fake.env` (the planted secret that `list_workspace` never shows).
 
    > **What you're actually doing:** same server, same tools — you're only swapping the *transport*
    > (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
@@ -166,25 +170,28 @@ machine's agent.
    > path the protocol is served at. That's also why *you* start it now and leave it running — with
    > stdio, Claude Code launched it on demand.
 
-2. **Expose it — on your LAN, or the public internet.** Pick whichever fits; both serve the same
-   `/mcp` over the same HTTP transport.
+2. **Expose it — default to your local Wi-Fi network.** Both paths below serve the same `/mcp` over
+   the same HTTP transport, but **(a) the local network is the default for this workshop** — simplest,
+   no extra tools. Use **(b) a tunnel** only if you and your partner aren't on the same network.
 
-   **(a) Local network (same Wi-Fi) — simplest, no extra tools.** Your server already binds
-   `0.0.0.0:8000` (every interface), so anyone on your network who can reach your machine can talk to
-   it. You just need your LAN IP and an open port:
+   **(a) Local network (same Wi-Fi) — the default.** With your server from step 1 **running**
+   (`python server/my_masterschool_mcp_server.py`), it already binds `0.0.0.0:8000` (every
+   interface) — so anyone on your Wi-Fi who can reach your machine can talk to it. You just need your
+   LAN IP and an open port:
    ```bash
    ipconfig getifaddr en0          # macOS Wi-Fi → e.g. 192.168.1.33   (try en1 for wired)
    #   Linux:    hostname -I | awk '{print $1}'
    #   Windows:  ipconfig   → "IPv4 Address"
    ```
-   Share `http://<YOUR-LAN-IP>:8000/mcp`. Caveats: you must both be on the **same network**; it must
-   **not** isolate devices (guest/corporate Wi-Fi often blocks device-to-device — "AP/client
-   isolation"); and your OS firewall must allow inbound TCP **8000** (macOS may prompt "accept
-   incoming connections?" the first time — click **Allow**). Nothing leaves your LAN — no internet
-   round-trip.
+   Share `http://<YOUR-LAN-IP>:8000/mcp` (this is the URL your partner uses in step 3). Caveats: you
+   must both be on the **same network**; it must **not** isolate devices (guest/corporate Wi-Fi often
+   blocks device-to-device — "AP/client isolation"); and your OS firewall must allow inbound TCP
+   **8000** (macOS may prompt "accept incoming connections?" the first time — click **Allow**).
+   Nothing leaves your LAN — no internet round-trip.
 
-   **(b) Public internet — a tunnel.** To cross NAT/firewalls or hand out a public URL, run one
-   tunnel (you only need one); each prints a public HTTPS URL:
+   **(b) Public internet — a tunnel (only if you're *not* on the same network).** To cross
+   NAT/firewalls or hand out a public URL, run one tunnel (you only need one); each prints a public
+   HTTPS URL:
    ```bash
    cloudflared tunnel --url http://localhost:8000      # no signup → https://<rand>.trycloudflare.com
    # or:  ngrok http 8000                              # free authtoken → https://<rand>.ngrok-free.app
@@ -195,11 +202,11 @@ machine's agent.
    > (then add a free authtoken). `npx localtunnel --port 8000` needs only Node (npx fetches it on
    > the fly), but loca.lt is flaky and shows a reminder page — **cloudflared is the smoothest.**
 
-3. **A partner connects to your URL** — the tunnel URL **or** your `http://<LAN-IP>:8000` on the
-   same Wi-Fi — **note the `/mcp` path:**
+3. **A partner connects to your URL — default to your LAN URL** (`http://<YOUR-LAN-IP>:8000/mcp`);
+   use the tunnel URL only if you're not on the same network. **Note the `/mcp` path:**
    ```bash
-   claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
-   # same network instead?  claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
+   claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
+   # not on the same network?  claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
    # inside Claude Code:  "Call name on partner-box"  → returns the OWNER's name (proof you reached THEIR server)
    #                      "Use read_workspace_file on partner-box to read workspace/README.md"
    ```

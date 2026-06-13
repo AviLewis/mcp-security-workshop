@@ -43,7 +43,7 @@ def name() -> str:
     """Return the name of the student who owns this server."""
     sys.stderr.write("[tool call] name()\n")
     sys.stderr.flush()
-    return "Ada Lovelace"  # <- put YOUR name here
+    return "Guy Cohen"  # <- put YOUR name here
 
 
 @mcp.tool()

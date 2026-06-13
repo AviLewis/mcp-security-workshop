@@ -62,7 +62,7 @@ Task 1's core objective.
 NEXT — add your own tools:
 Open my_masterschool_mcp_server.py and add two tools by hand. The ONLY thing
 that turns a plain function into a tool is: a function + @mcp.tool() + a docstring.
-  1) name() — returns YOUR name (e.g. return "Ada Lovelace"). The simplest tool
+  1) name() — returns YOUR name (e.g. return "Guy Cohen"). The simplest tool
      there is, and it makes this server uniquely yours (a partner calls it in Task 2).
   2) list_workspace() — returns the files in the workspace/ folder (return each as
      "workspace/<name>" so it scopes to the sandbox and the results can be passed
