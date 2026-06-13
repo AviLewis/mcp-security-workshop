@@ -142,6 +142,15 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
    The change is `FastMCP(..., host="0.0.0.0", port=8000)` + `mcp.run(transport="streamable-http")`.
    Start it: `python my_masterschool_mcp_server.py` (leave it running).
 
+   > **What you're actually doing:** same server, same tools — you're only swapping the *transport*
+   > (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
+   > a local subprocess and spoke over its private stdin/stdout pipe, so only this machine could reach
+   > it. **Streamable HTTP** instead runs your server as a long-lived web server listening on a network
+   > port, so any HTTP client can connect to it by URL. `host="0.0.0.0"` = accept connections on every
+   > network interface (not just localhost); `port=8000` = the TCP port it listens on; `/mcp` = the URL
+   > path the protocol is served at. That's also why *you* start it now and leave it running — with
+   > stdio, Claude Code launched it on demand.
+
 2. **Expose it with a tunnel** (default path — pick one; all give you a public HTTPS URL):
    ```bash
    cloudflared tunnel --url http://localhost:8000      # no signup → https://<rand>.trycloudflare.com
