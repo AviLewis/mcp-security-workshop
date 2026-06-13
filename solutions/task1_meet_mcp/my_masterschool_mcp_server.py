@@ -1,6 +1,6 @@
 # my_masterschool_mcp_server.py (SOLUTION) — the result of the Task 1 "hand-edit" beat.
 #
-# Same as the Task 1 starter, but with ONE tool added BY HAND: list_workspace().
+# Same as the Task 1 starter, but with TWO tools added BY HAND: name() and list_workspace().
 # This is the "you just extended an MCP server yourself" moment. Notice the pattern:
 # a plain Python function + the @mcp.tool() decorator + a docstring == a new tool the
 # agent can discover and call. Nothing else changes.
@@ -24,6 +24,14 @@ def read_workspace_file(path: str) -> str:
         return f.read()
 
 
+@mcp.tool()  # the simplest tool there is: a function + @mcp.tool() + a docstring
+def name() -> str:
+    """Return the name of the student who owns this server."""
+    sys.stderr.write("[tool call] name()\n")
+    sys.stderr.flush()
+    return "Ada Lovelace"  # <- put YOUR name here
+
+
 @mcp.tool()  # <-- the ONLY thing that makes list_workspace discoverable
 def list_workspace() -> list[str]:
     """List the files in the workspace/ folder."""
@@ -31,7 +39,7 @@ def list_workspace() -> list[str]:
     sys.stderr.flush()
     # Scope to the workspace/ sandbox (not the server's own folder), and return
     # workspace/<name> so each result can be passed straight to read_workspace_file.
-    return sorted(f"workspace/{name}" for name in os.listdir("workspace"))
+    return sorted(f"workspace/{n}" for n in os.listdir("workspace"))
 
 
 if __name__ == "__main__":

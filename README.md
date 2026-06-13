@@ -113,10 +113,17 @@ the server runs it → the result returns to the agent's context.*
    `notes.txt` doesn't contain notes — it contains a **step-by-step explanation of the very loop
    that just delivered it to you**. The text coming back *is* your proof the loop ran end-to-end
    (Claude Code also shows the tool call in its interface).
-4. **Add a second tool.** In the server, add `list_workspace()` that returns the files in the
-   `workspace/` folder (the whole recipe: a function + `@mcp.tool()` + a docstring). You don't
-   re-register — the path didn't change; just reconnect the server (`/mcp` → Reconnect, or restart
-   Claude Code) so it re-discovers the tools, then ask your agent to call `list_workspace`.
+4. **Add your own tools by hand.** This is the "you can extend the server yourself" beat — write
+   two tools, each just a function + `@mcp.tool()` + a docstring:
+   - **`name()`** — returns *your* name (e.g. `return "Ada Lovelace"`). The simplest possible tool,
+     and it makes the server uniquely yours — in Task 2 a partner calls it to confirm they reached
+     *your* machine.
+   - **`list_workspace()`** — returns the files in the `workspace/` folder (a tool that does real
+     work; its results feed straight into `read_workspace_file`).
+
+   You don't re-register — the path didn't change; just reconnect the server (`/mcp` → Reconnect, or
+   restart Claude Code) so it re-discovers the tools, then ask your agent to call `name` and
+   `list_workspace`.
 
 > **Current working directory (cwd) note:** a stdio server inherits the *current working
 > directory* — the folder a process resolves relative paths against — of whatever launches it.
@@ -124,7 +131,7 @@ the server runs it → the result returns to the agent's context.*
 > no matter who starts it. (Same truth as Task 2's boundary: a tool reads with the *process's*
 > view of the filesystem, not your idea of "the workspace.")
 
-✅ **Checkpoint:** your agent reads `notes.txt`, your hand-added `list_workspace` tool works, and
+✅ **Checkpoint:** your agent reads `notes.txt`, your hand-added `name` and `list_workspace` tools work, and
 you can narrate the discovery→invoke loop without notes.
 
 ---
@@ -138,7 +145,7 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
 
 1. **Reuse your Task 1 server, then swap its transport** (agent-assisted is fine — "gist" level).
    The server you put on the network is the **same file-reading server you built in Task 1**
-   (`read_workspace_file` + `list_workspace`) — you're only changing how it's reached. Copy it next
+   (`read_workspace_file`, `list_workspace`, `name`) — you're only changing how it's reached. Copy it next
    to the Task 2 fixtures so the planted files are in its scope, then change the transport:
    ```bash
    cp task1_meet_mcp/my_masterschool_mcp_server.py task2_network/
@@ -187,7 +194,8 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
    ```bash
    claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
    # same network instead?  claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
-   # inside Claude Code:  "Use read_workspace_file on partner-box to read workspace/README.md"
+   # inside Claude Code:  "Call name on partner-box"  → returns the OWNER's name (proof you reached THEIR server)
+   #                      "Use read_workspace_file on partner-box to read workspace/README.md"
    ```
 
 4. **The reveal:** a planted `task2_network/fake.env` (fake secret) is readable too. Predict

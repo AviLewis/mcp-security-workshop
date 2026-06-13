@@ -59,10 +59,12 @@ If you can narrate those five steps without looking, you have mastered
 Task 1's core objective.
 ------------------------------------------------------------
 
-NEXT — add a second tool:
-Open my_masterschool_mcp_server.py and add a SECOND tool, list_workspace(),
-that returns the files in the workspace/ folder (return each as
-"workspace/<name>" so it scopes to the sandbox and the results can be passed
-straight to read_workspace_file). The ONLY thing that turns a plain function
-into a tool is: a function + @mcp.tool() + a docstring.
-Reconnect the server, then ask your agent to call your new tool.
+NEXT — add your own tools:
+Open my_masterschool_mcp_server.py and add two tools by hand. The ONLY thing
+that turns a plain function into a tool is: a function + @mcp.tool() + a docstring.
+  1) name() — returns YOUR name (e.g. return "Ada Lovelace"). The simplest tool
+     there is, and it makes this server uniquely yours (a partner calls it in Task 2).
+  2) list_workspace() — returns the files in the workspace/ folder (return each as
+     "workspace/<name>" so it scopes to the sandbox and the results can be passed
+     straight to read_workspace_file).
+Reconnect the server, then ask your agent to call your new tools.
