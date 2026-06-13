@@ -158,6 +158,12 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
    # or:  npx localtunnel --port 8000                  # no signup → https://<rand>.loca.lt
    ```
 
+   > **`zsh: command not found`?** None of these ship with your OS — install one (you only need
+   > one). Easiest on macOS: `brew install cloudflared` (no signup, no click-through — recommended),
+   > or `brew install ngrok` (then add a free authtoken). If you have Node, `npx localtunnel --port
+   > 8000` needs no install — npx fetches it on the fly — but localtunnel shows a one-time reminder
+   > page, so cloudflared is the smoothest for this demo.
+
 3. **A partner connects to your tunnel URL — note the `/mcp` path:**
    ```bash
    claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
