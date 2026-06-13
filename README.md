@@ -216,11 +216,18 @@ machine's agent.
    ```bash
    claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
    # not on the same network?  claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
-   # inside Claude Code:  "Call name on partner-box"  → returns the OWNER's name (proof you reached THEIR server)
-   #                      "Use read_workspace_file on partner-box to read workspace/README.md"
    ```
+   Confirm Claude Code discovered it: `/mcp` should now list **partner-box** with its tools.
 
-4. **The reveal:** the planted `server/fake.env` (fake secret) is readable too — even though
+4. **Test the tools on the box you just connected to.** In Claude Code, paste a prompt that exercises
+   each tool on `partner-box` so you can watch the round-trip work:
+   > "On **partner-box**, call `name` to see whose server this is, then `list_workspace` to list its
+   > files, then use `read_workspace_file` to read `workspace/README.md`. Show me each result."
+
+   You should get back the owner's name, the workspace listing, and the file's contents — all fetched
+   over the network from another machine's process. That's the Task 1 loop, now crossing a machine boundary.
+
+5. **The reveal:** the planted `server/fake.env` (fake secret) is readable too — even though
    `list_workspace` never listed it. Predict whether your partner's agent can read `fake.env`, then
    have them try. It can.
 
