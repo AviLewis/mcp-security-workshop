@@ -113,23 +113,10 @@ the server runs it → the result returns to the agent's context.*
    `notes.txt` doesn't contain notes — it contains a **step-by-step explanation of the very loop
    that just delivered it to you**. The text coming back *is* your proof the loop ran end-to-end
    (Claude Code also shows the tool call in its interface).
-4. **Hand-edit (no agent writes this):** open the server and add a second tool `list_workspace()`
-   that returns the files in the **`workspace/` folder** — scope it to the sandbox, e.g.
-   `return sorted(f"workspace/{n}" for n in os.listdir("workspace"))`, so it doesn't list the
-   server's own source and each result is ready to hand to `read_workspace_file`. The whole recipe:
-   a function + `@mcp.tool()` + a docstring. You do **not** re-register — the file path didn't
-   change; Claude Code just needs to relaunch the server so it re-discovers the tools:
-   ```
-   # Reconnect so the new tool is picked up — pick ONE:
-   #   (a) exit Claude Code (Ctrl-C / Ctrl-D) and start a new session:  claude
-   #   (b) inside Claude Code:  /mcp  → select my_masterschool_mcp_server → Reconnect
-
-   # Then confirm it and call your new tool — in Claude Code:
-   /mcp                                  # list_workspace should now appear (two tools)
-   "Use list_workspace to show the files in the workspace"
-   ```
-   (If `/mcp` still shows only one tool after reconnecting, your `@mcp.tool()` decorator or the
-   docstring is missing — that's the usual cause.)
+4. **Add a second tool.** In the server, add `list_workspace()` that returns the files in the
+   `workspace/` folder (the whole recipe: a function + `@mcp.tool()` + a docstring). You don't
+   re-register — the path didn't change; just reconnect the server (`/mcp` → Reconnect, or restart
+   Claude Code) so it re-discovers the tools, then ask your agent to call `list_workspace`.
 
 > **Current working directory (cwd) note:** a stdio server inherits the *current working
 > directory* — the folder a process resolves relative paths against — of whatever launches it.

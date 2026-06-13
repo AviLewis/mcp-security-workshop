@@ -59,7 +59,7 @@ If you can narrate those five steps without looking, you have mastered
 Task 1's core objective.
 ------------------------------------------------------------
 
-NEXT — the hand-edit beat (do this by hand, no agent writing it):
+NEXT — add a second tool:
 Open my_masterschool_mcp_server.py and add a SECOND tool, list_workspace(),
 that returns the files in the workspace/ folder (return each as
 "workspace/<name>" so it scopes to the sandbox and the results can be passed
