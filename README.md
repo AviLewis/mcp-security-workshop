@@ -164,9 +164,19 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
    > 8000` needs no install — npx fetches it on the fly — but localtunnel shows a one-time reminder
    > page, so cloudflared is the smoothest for this demo.
 
-3. **A partner connects to your tunnel URL — note the `/mcp` path:**
+   > **On the same Wi-Fi? You may not need a tunnel at all.** If you and your partner are on the
+   > same network and it doesn't block device-to-device traffic (no client/AP "isolation"), your
+   > server is already reachable directly: it binds `0.0.0.0:8000`, so a partner connects over the
+   > LAN with the **same HTTP transport** — no tunnel tool required. The server prints your LAN URL
+   > on startup (or run `ipconfig getifaddr en0` on macOS Wi-Fi); the partner uses
+   > `http://<YOUR-LAN-IP>:8000/mcp` in the next step. A tunnel is only needed to cross networks —
+   > NAT, firewalls, or to hand out a truly public URL.
+
+3. **A partner connects to your URL** — the tunnel URL **or** your `http://<LAN-IP>:8000` on the
+   same Wi-Fi — **note the `/mcp` path:**
    ```bash
    claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
+   # same network instead?  claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
    # inside Claude Code:  "Use read_workspace_file on partner-box to read workspace/notes.txt"
    ```
 
@@ -182,9 +192,8 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
 > 🛑 **Stop the server and the tunnel** when you're done — don't leave a file-reader exposed to
 > the internet.
 
-**LAN fallback** (if you can't tunnel and you're on the same WiFi with no client isolation): the
-server prints your LAN IP on startup; a partner uses `http://<YOUR-LAN-IP>:8000/mcp`. To rehearse
-solo, run `python solutions/task2_network/client_http_demo.py http://127.0.0.1:8000/mcp`.
+**Rehearse solo (no partner)?** Be the "peer" client against your own server:
+`python solutions/task2_network/client_http_demo.py http://127.0.0.1:8000/mcp`.
 
 ✅ **Checkpoint:** a partner's agent read a file on your machine **and** you can state in one
 sentence the boundary you crossed.
