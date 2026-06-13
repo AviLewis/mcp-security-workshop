@@ -17,9 +17,9 @@ Hands-on starter kit for the **MCP & Security** workshop. You'll build a real MC
 ## What's here
 
 ```
-task1_meet_mcp/     ← Task 1 starter: my_masterschool_mcp_server.py (one tool) + a
-                       workspace/notes.txt that explains the MCP loop when you read it
-task2_network/      ← Task 2 fixtures: you add the HTTP transport + tunnel yourself
+server/             ← YOUR server, reused across Task 1 & 2: my_masterschool_mcp_server.py
+                       (one tool to start) + workspace/notes.txt (explains the MCP loop when
+                       you read it) + a planted fake.env (the "secret" Task 2 exposes)
 task3_security/     ← Task 3 CTF: a vulnerable server to attack, then harden
 solutions/          ← ⛔ SPOILERS — the finished, runnable version of all three tasks
 ```
@@ -63,13 +63,13 @@ Keep this venv activated for the rest of the workshop (so `python` and `claude m
 *your prompt → client lists tools → agent picks one → client invokes it with arguments →
 the server runs it → the result returns to the agent's context.*
 
-1. **Read** `task1_meet_mcp/my_masterschool_mcp_server.py` line by line. Find the `@mcp.tool()`
+1. **Read** `server/my_masterschool_mcp_server.py` line by line. Find the `@mcp.tool()`
    decorator — that one line is what makes a plain function *discoverable* by an agent.
 2. **Register it with your own Claude Code agent.** Run this **from the repo root** (where setup
-   left you) — note the `task1_meet_mcp/` in the path, and keep the venv activated:
+   left you) — note the `server/` in the path, and keep the venv activated:
    ```bash
    claude mcp add --transport stdio my_masterschool_mcp_server -- \
-     "$(which python)" "$(pwd)/task1_meet_mcp/my_masterschool_mcp_server.py"
+     "$(which python)" "$(pwd)/server/my_masterschool_mcp_server.py"
    claude mcp list
 
    # (optional) remove it again — for troubleshooting or a clean restart:
@@ -83,7 +83,7 @@ the server runs it → the result returns to the agent's context.*
      `$(which python)` = the venv Python that has `mcp`; `$(pwd)/…/…py` = the absolute path to
      the server file. Both are absolute so Claude Code can launch it from anywhere.
 
-   > Registered from the wrong folder and `claude mcp list` shows a path without `task1_meet_mcp/`?
+   > Registered from the wrong folder and `claude mcp list` shows a path without `server/`?
    > Run `claude mcp remove my_masterschool_mcp_server` and re-run the command above from the repo root.
 
    > **`/mcp` says `Command: python not found` / `✘ Failed to connect`?** You ran `claude mcp add`
@@ -136,28 +136,26 @@ you can narrate the discovery→invoke loop without notes.
 
 ---
 
-## Task 2 — Expose it on the public internet (streamable HTTP + tunnel)
+## Task 2 — Expose it on the network (streamable HTTP — LAN or public tunnel)
 
 **Goal (🔍 master this):** the moment your server is reachable off your machine, its tools are
 callable by *someone else's* agent — and the server has no idea what "your workspace" means. It
-reads whatever the **process** can read. We use a **tunnel** (not the LAN) so this works through
-any firewall/NAT — and so the boundary is honest: your file-reader is now on the *public internet*.
+reads whatever the **process** can read. You can expose it two ways — on your **local network**
+(same Wi-Fi, simplest) or, to cross any firewall/NAT and hand out a *public* URL, through a
+**tunnel**. Either way the boundary is the same: your file-reader is now reachable by another
+machine's agent.
 
 1. **Reuse your Task 1 server, then swap its transport** (agent-assisted is fine — "gist" level).
    The server you put on the network is the **same file-reading server you built in Task 1**
-   (`read_workspace_file`, `list_workspace`, `name`) — you're only changing how it's reached. Copy it next
-   to the Task 2 fixtures so the planted files are in its scope, then change the transport:
-   ```bash
-   cp task1_meet_mcp/my_masterschool_mcp_server.py task2_network/
-   cd task2_network
-   ```
-   Ask your agent:
+   (`read_workspace_file`, `list_workspace`, `name`) in the same `server/` folder — you don't copy
+   or recreate it, you just change how it's reached. Ask your agent:
    > "Change my MCP server to **streamable HTTP** on host `0.0.0.0`, port `8000`, served at `/mcp`."
 
    The change is `FastMCP(..., host="0.0.0.0", port=8000)` + `mcp.run(transport="streamable-http")`.
-   Start it from `task2_network/`: `python my_masterschool_mcp_server.py` (leave it running). Because
-   the server `os.chdir`s to its own folder, "the workspace" is now `task2_network/` — so a remote
-   agent reaches `workspace/README.md` (a normal file) **and** `fake.env` (the planted secret).
+   Start it (it `os.chdir`s to its own folder, so run it from anywhere):
+   `python server/my_masterschool_mcp_server.py` — leave it running. "The workspace" stays `server/`,
+   so a remote agent reaches `workspace/README.md` (a normal file) **and** `fake.env` (the planted
+   secret that `list_workspace` never shows).
 
    > **What you're actually doing:** same server, same tools — you're only swapping the *transport*
    > (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
@@ -168,26 +166,34 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
    > path the protocol is served at. That's also why *you* start it now and leave it running — with
    > stdio, Claude Code launched it on demand.
 
-2. **Expose it with a tunnel** (default path — pick one; all give you a public HTTPS URL):
+2. **Expose it — on your LAN, or the public internet.** Pick whichever fits; both serve the same
+   `/mcp` over the same HTTP transport.
+
+   **(a) Local network (same Wi-Fi) — simplest, no extra tools.** Your server already binds
+   `0.0.0.0:8000` (every interface), so anyone on your network who can reach your machine can talk to
+   it. You just need your LAN IP and an open port:
+   ```bash
+   ipconfig getifaddr en0          # macOS Wi-Fi → e.g. 192.168.1.33   (try en1 for wired)
+   #   Linux:    hostname -I | awk '{print $1}'
+   #   Windows:  ipconfig   → "IPv4 Address"
+   ```
+   Share `http://<YOUR-LAN-IP>:8000/mcp`. Caveats: you must both be on the **same network**; it must
+   **not** isolate devices (guest/corporate Wi-Fi often blocks device-to-device — "AP/client
+   isolation"); and your OS firewall must allow inbound TCP **8000** (macOS may prompt "accept
+   incoming connections?" the first time — click **Allow**). Nothing leaves your LAN — no internet
+   round-trip.
+
+   **(b) Public internet — a tunnel.** To cross NAT/firewalls or hand out a public URL, run one
+   tunnel (you only need one); each prints a public HTTPS URL:
    ```bash
    cloudflared tunnel --url http://localhost:8000      # no signup → https://<rand>.trycloudflare.com
    # or:  ngrok http 8000                              # free authtoken → https://<rand>.ngrok-free.app
    # or:  npx localtunnel --port 8000                  # no signup → https://<rand>.loca.lt
    ```
-
-   > **`zsh: command not found`?** None of these ship with your OS — install one (you only need
-   > one). Easiest on macOS: `brew install cloudflared` (no signup, no click-through — recommended),
-   > or `brew install ngrok` (then add a free authtoken). If you have Node, `npx localtunnel --port
-   > 8000` needs no install — npx fetches it on the fly — but localtunnel shows a one-time reminder
-   > page, so cloudflared is the smoothest for this demo.
-
-   > **On the same Wi-Fi? You may not need a tunnel at all.** If you and your partner are on the
-   > same network and it doesn't block device-to-device traffic (no client/AP "isolation"), your
-   > server is already reachable directly: it binds `0.0.0.0:8000`, so a partner connects over the
-   > LAN with the **same HTTP transport** — no tunnel tool required. Find your LAN IP with
-   > `ipconfig getifaddr en0` (macOS Wi-Fi); the partner uses `http://<YOUR-LAN-IP>:8000/mcp` in the
-   > next step. A tunnel is only needed to cross networks —
-   > NAT, firewalls, or to hand out a truly public URL.
+   > **`zsh: command not found`?** None of these ship with your OS — install one. Easiest on macOS:
+   > `brew install cloudflared` (no signup, no click-through — recommended), or `brew install ngrok`
+   > (then add a free authtoken). `npx localtunnel --port 8000` needs only Node (npx fetches it on
+   > the fly), but loca.lt is flaky and shows a reminder page — **cloudflared is the smoothest.**
 
 3. **A partner connects to your URL** — the tunnel URL **or** your `http://<LAN-IP>:8000` on the
    same Wi-Fi — **note the `/mcp` path:**
@@ -198,20 +204,21 @@ any firewall/NAT — and so the boundary is honest: your file-reader is now on t
    #                      "Use read_workspace_file on partner-box to read workspace/README.md"
    ```
 
-4. **The reveal:** a planted `task2_network/fake.env` (fake secret) is readable too. Predict
-   whether your partner's agent can read it, then have them try. It can.
+4. **The reveal:** the planted `server/fake.env` (fake secret) is readable too — even though
+   `list_workspace` never listed it. Predict whether your partner's agent can read `fake.env`, then
+   have them try. It can.
 
-> 🔍 **Why the tunnel "just works" — and the trap.** Binding `host="0.0.0.0"` *also turns off*
+> 🔍 **Why it "just works" off your machine — and the trap.** Binding `host="0.0.0.0"` *also turns off*
 > the MCP SDK's **DNS-rebinding protection**, so the server accepts requests with *any* `Host`
-> header — including your tunnel's domain. If you "harden" by switching to `host="127.0.0.1"`,
-> the SDK only allows a `localhost` Host and your tunnel dies with **`421 Misdirected Request`** —
+> header — including your tunnel's domain or your LAN IP. If you "harden" by switching to `host="127.0.0.1"`,
+> the SDK only allows a `localhost` Host and a tunnel/LAN connection dies with **`421 Misdirected Request`** —
 > a *security control* that looks exactly like a network bug. Convenience vs. safety, in one line.
 
-> 🛑 **Stop the server and the tunnel** when you're done — don't leave a file-reader exposed to
-> the internet.
+> 🛑 **Stop the server (and any tunnel)** when you're done — don't leave a file-reader listening
+> on your network or the internet.
 
 **Rehearse solo (no partner)?** Be the "peer" client against your own server:
-`python solutions/task2_network/client_http_demo.py http://127.0.0.1:8000/mcp`.
+`python solutions/server/client_http_demo.py http://127.0.0.1:8000/mcp`.
 
 ✅ **Checkpoint:** a partner's agent read a file on your machine **and** you can state in one
 sentence the boundary you crossed.
