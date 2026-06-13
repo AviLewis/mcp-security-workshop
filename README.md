@@ -71,6 +71,9 @@ the server runs it → the result returns to the agent's context.*
    claude mcp add --transport stdio my_masterschool_mcp_server -- \
      "$(which python)" "$(pwd)/task1_meet_mcp/my_masterschool_mcp_server.py"
    claude mcp list
+
+   # (optional) remove it again — for troubleshooting or a clean restart:
+   claude mcp remove my_masterschool_mcp_server
    ```
    What each part means:
    - `claude mcp add` — register a new MCP server in your Claude Code config.
@@ -82,6 +85,25 @@ the server runs it → the result returns to the agent's context.*
 
    > Registered from the wrong folder and `claude mcp list` shows a path without `task1_meet_mcp/`?
    > Run `claude mcp remove my_masterschool_mcp_server` and re-run the command above from the repo root.
+
+   > **`/mcp` says `Command: python not found` / `✘ Failed to connect`?** You ran `claude mcp add`
+   > with **no venv active**, so `$(which python)` had nothing to find and baked the literal text
+   > *"python not found"* in as the launch command. Fix it:
+   > `claude mcp remove my_masterschool_mcp_server`, then `source .venv/bin/activate`, confirm
+   > `which python` prints a path ending in `.venv/bin/python` (not "python not found"), and re-run
+   > the `claude mcp add` above. (The registration is frozen at add-time — it stores whatever
+   > `$(which python)` was *then*, so the venv must be active *when you register*.)
+
+   > **Managing the registration (troubleshooting toolkit):**
+   > - `claude mcp list` — show every server, its scope, and ✓/✘ status. (Inside Claude Code: `/mcp`.)
+   > - `claude mcp remove my_masterschool_mcp_server` — delete it so you can re-add cleanly.
+   > - **Scope:** a server lives in a scope — `local` (just you, this project — the default),
+   >   `user` (global, all your projects), or `project` (a shared `.mcp.json` in the repo). `remove`
+   >   looks in `local` first; if the same name lives elsewhere, force it with `-s user` /
+   >   `-s project` / `-s local`.
+   > - **By hand (last resort):** delete the entry from `~/.claude.json` under that project's
+   >   `"mcpServers"` block — but do it with **Claude Code closed**, or it rewrites the file on exit
+   >   and undoes your edit.
 3. **Test it entirely from inside the agent** — you never run the Python file yourself; Claude
    Code launches it for you. In Claude Code:
    ```
