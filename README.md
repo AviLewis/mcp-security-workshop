@@ -155,6 +155,7 @@ machine's agent.
    Then **run the server and leave it running in its own terminal** (it `os.chdir`s to its own
    folder, so launch it from anywhere):
    ```bash
+   source .venv/bin/activate                       # new terminal? activate first, or `python` won't be found
    python server/my_masterschool_mcp_server.py     # prints its URLs; Ctrl-C to stop when done
    ```
    It keeps running and listening — *this* is the process a partner (or you) connects to in steps 2–3.
