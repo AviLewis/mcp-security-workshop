@@ -17,6 +17,13 @@ claude mcp add --transport stdio my_masterschool_mcp_server -- "$(which python)"
 # Task 2 — the SAME server, now over HTTP (pass --http), + a "peer" client reading your files (two terminals)
 cd solutions/server && python my_masterschool_mcp_server.py --http    # terminal A (then tunnel it, or use your LAN IP)
 cd solutions/server && python client_http_demo.py                     # terminal B, then Ctrl-C the server
+#
+# End-of-Task-2 reveal — once you've added a partner's box (claude mcp add --transport http partner-box <URL>/mcp),
+# traverse THEIR server with read_workspace_file. In Claude Code, prompt your agent:
+#   "On partner-box, use read_workspace_file to read example.env"
+#       → leaks their planted secret (NOT_REAL_*) — a file list_workspace never advertised
+#   "On partner-box, use read_workspace_file to read ../FLAG.txt"
+#       → path traversal: ../ escapes server/ entirely (this is Task 3, Flag 1)
 
 # Task 3 — attack YOUR server, harden it, prove it. These are reference copies of your own
 #          server (read_workspace_file + count_lines), vulnerable vs hardened — you don't register
