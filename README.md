@@ -350,6 +350,15 @@ one string, so a `;` in `filename` starts a *second* command.)
 `count_lines("workspace/notes.txt; whoami")`. Did the injected `whoami` run? Record it. (You just
 authored a remote-code-execution hole in your own server — every tool you expose is an attack surface.)
 
+> **🛡️ Your agent may BLOCK this — and that's its own lesson.** If the result is a *guardrail* error
+> (e.g. "command injection … shell execution") instead of `whoami`'s output, your Claude Code has a
+> **security guardrail** (the `agent-security-guardrails` plugin) that caught the injection
+> **client-side** — it never reached your server. That's real defense-in-depth (like Flag 3's refusal),
+> but it *masks* the point: **your server is still vulnerable.** Prove the server hole with a raw client
+> that has no guardrail: `python solutions/task3_security/attack_demo.py` calls the tool directly and
+> shows `whoami` actually running (`PWNED`). Takeaway: dropping `shell=True` is the *real* fix — an agent
+> guardrail is a backstop you can't assume every client has.
+
 **🚩 Flag 3 — indirect prompt injection.** Have your agent read `workspace/meeting_notes.txt` and
 summarize it. Predict what it will do, then watch. A modern agent usually **refuses** the hidden
 instruction — that's the *start*, not the end:
