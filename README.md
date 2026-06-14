@@ -353,15 +353,14 @@ authored a remote-code-execution hole in your own server — every tool you expo
 > **🛡️ Your agent may BLOCK this — and that's its own lesson.** If the result is a *guardrail* error
 > (e.g. "command injection … shell execution") instead of `whoami`'s output, your Claude Code has a
 > **security guardrail** (the `agent-security-guardrails` plugin) that caught the injection
-> **client-side** — it never reached your server. That's real defense-in-depth (like Flag 3's refusal),
-> but it *masks* the point: **your server is still vulnerable.** Prove it with a raw client that has no
-> guardrail — and you can do it **right inside Claude Code**: ask the agent to run
-> `python solutions/task3_security/attack_demo.py`. That's a *Bash subprocess* using its **own** MCP
-> client, so your agent's PreToolUse guardrail never inspects it — `count_lines` runs the injection and
-> you'll see `whoami` execute (`PWNED`). That hits the *reference* server; to prove **your own**
-> running `--http` server, point the raw client at it:
-> `python solutions/server/client_http_demo.py --attack http://127.0.0.1:8000/mcp`. Takeaway: dropping
-> `shell=True` is the *real* fix — an agent guardrail is a backstop you can't assume every client has.
+> **client-side** — it never reached your server. That's real defense-in-depth, but it *masks* the
+> point: **your server is still vulnerable.** Prove it with a raw client that has no guardrail — you can
+> do it **right inside Claude Code**: ask the agent to run
+> `python solutions/server/client_http_demo.py --attack http://127.0.0.1:8000/mcp` (point it at your own
+> running `--http` server). That's a *Bash subprocess* using its **own** MCP client, so your agent's
+> PreToolUse guardrail never inspects it — `count_lines` runs the injection and you'll see `whoami`
+> execute (`PWNED`). Takeaway: dropping `shell=True` is the *real* fix — an agent guardrail is a backstop
+> you can't assume every client has.
 
 **🚩 Flag 3 — indirect prompt injection.** Have your agent read `workspace/meeting_notes.txt` and
 summarize it. Predict what it will do, then watch. A modern agent usually **refuses** the hidden
