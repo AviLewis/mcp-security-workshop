@@ -160,7 +160,7 @@ machine's agent.
    python server/my_masterschool_mcp_server.py --http     # ← the --http flag = HTTP. Leave it running.
    #   WITHOUT --http it runs stdio and opens NO port — the #1 "can't connect to :8000" cause.
    # stale/duplicate server, or port 8000 stuck? kill every copy and start fresh:
-   pkill -f my_masterschool_mcp_server
+   pkill -9 -f my_masterschool_mcp_server
    ```
    You'll see the `✅ … streamable-http … Uvicorn running on http://0.0.0.0:8000` banner and it holds
    the terminal — *this* is the process a partner (or you) connects to in steps 2–3. "The workspace"
@@ -185,7 +185,7 @@ machine's agent.
    > so it's running on **stdio** — which opens **no port** (its banner even says "stdio transport …
    > there is no URL"). Stop it and re-run **with `--http`**; the banner then shows your URLs and it
    > keeps listening on `0.0.0.0:8000`. Confirm with `lsof -nP -iTCP:8000 -sTCP:LISTEN` (should show
-   > your `python`). Clear stray servers with `pkill -f my_masterschool_mcp_server`.
+   > your `python`). Clear stray servers with `pkill -9 -f my_masterschool_mcp_server`.
 
 2. **Expose it — default to your local Wi-Fi network.** Both paths below serve the same `/mcp` over
    the same HTTP transport, but **(a) the local network is the default for this workshop** — simplest,
@@ -326,7 +326,7 @@ working directory is `server/`, so attack paths are relative to that.
 > **🔁 Edited the server (added a tool, or hardened it)? Cycle it — or you'll keep hitting the OLD code.**
 > Your HTTP server is a long-running process, so code changes don't apply until you:
 > ```bash
-> pkill -f my_masterschool_mcp_server                    # 0. stop the running server
+> pkill -9 -f my_masterschool_mcp_server                    # 0. stop the running server
 > python server/my_masterschool_mcp_server.py --http     # 1. restart it (picks up your edits)
 > # 2. reconnect the client — in Claude Code: /mcp → partner-box → Reconnect, OR re-add it:
 > claude mcp remove partner-box
@@ -443,6 +443,6 @@ python test_hardening.py        # 8/8 checks pass
 
 ---
 
-> 🛑 **When you're done:** stop every server and tunnel — `pkill -f my_masterschool_mcp_server`, and
+> 🛑 **When you're done:** stop every server and tunnel — `pkill -9 -f my_masterschool_mcp_server`, and
 > Ctrl-C any cloudflared/ngrok/localtunnel. Don't leave a file-reader listening on your network or
 > the internet.
