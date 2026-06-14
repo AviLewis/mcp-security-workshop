@@ -7,7 +7,7 @@ from mcp.server.fastmcp import FastMCP
 
 os.chdir(Path(__file__).resolve().parent)
 
-mcp = FastMCP("my_masterschool_mcp_server", host="0.0.0.0", port=8000)
+mcp = FastMCP("my_masterschool_mcp_server")
 
 
 @mcp.tool()
@@ -38,11 +38,19 @@ def print_ready_banner(transport: str) -> None:
             "   Claude Code talks to this over stdin/stdout; there is no URL.\n"
         )
     else:
+        ip = lan_ip()
         sys.stderr.write(
             "✅ MCP server READY — streamable-http on 0.0.0.0:8000  (served at /mcp)\n"
         )
-        sys.stderr.write("   local:       http://127.0.0.1:8000/mcp\n")
-        sys.stderr.write(f"   same Wi-Fi:  http://{lan_ip()}:8000/mcp\n")
+        sys.stderr.write("   local URL:   http://127.0.0.1:8000/mcp\n")
+        sys.stderr.write(f"   Wi-Fi URL:   http://{ip}:8000/mcp\n")
+        sys.stderr.write("   ── connect a client (run in ANOTHER terminal) ──\n")
+        sys.stderr.write(
+            "   on THIS machine:   claude mcp add --transport http partner-box http://127.0.0.1:8000/mcp\n"
+        )
+        sys.stderr.write(
+            f"   from same Wi-Fi:   claude mcp add --transport http partner-box http://{ip}:8000/mcp\n"
+        )
         sys.stderr.write("   leave this terminal running · Ctrl-C to stop\n")
     sys.stderr.write("=" * 70 + "\n\n")
     sys.stderr.flush()

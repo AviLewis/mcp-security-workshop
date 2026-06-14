@@ -137,7 +137,7 @@ you can narrate the discovery→invoke loop without notes.
 
 ---
 
-## Task 2 — Expose it on the network (streamable HTTP — LAN or public tunnel)
+## Task 2 — Expose it on the network and connect to your friend's server (streamable HTTP)
 
 **Goal (🔍 master this):** the moment your server is reachable off your machine, its tools are
 callable by *someone else's* agent — and the server has no idea what "your workspace" means. It
@@ -146,10 +146,15 @@ reads whatever the **process** can read. You can expose it two ways — on your 
 **tunnel**. Either way the boundary is the same: your file-reader is now reachable by another
 machine's agent.
 
-1. **Put your Task 1 server on the network — launch it with `--http`.** It's the **same file-reading
-   server you built in Task 1** (`read_workspace_file`, `list_workspace`, `name`) in the same
-   `server/` folder — no new server, no edits. It already supports both transports; the `if "--http"
-   in sys.argv` line in `__main__` flips it to **streamable-HTTP on `0.0.0.0:8000`**:
+1. **Put your Task 1 server on the network.** It's the **same file-reading server you built in Task 1**
+   (`read_workspace_file`, `list_workspace`, `name`) in the same `server/` folder — one small edit and a
+   flag. First, **bind it to the network** by adding `host` + `port` to the `FastMCP(...)` line (Task 1
+   left it off — stdio doesn't need them):
+   ```python
+   mcp = FastMCP("my_masterschool_mcp_server", host="0.0.0.0", port=8000)
+   ```
+   Then launch it with the **`--http`** flag (the `if "--http" in sys.argv` line in `__main__` flips the
+   transport to streamable-HTTP):
    ```bash
    source .venv/bin/activate                              # new terminal? activate first, or `python` won't be found
    python server/my_masterschool_mcp_server.py --http     # ← the --http flag = HTTP. Leave it running.
