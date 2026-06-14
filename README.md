@@ -7,10 +7,10 @@ Hands-on starter kit for the **MCP & Security** workshop. You'll build a real MC
 > (no agent writes your server). From Task 2 you may use your agent — but you must be able to
 > *explain* every line that runs.
 
-> ⚠️ **Educational use only.** This repo contains a **deliberately vulnerable** server and a
-> capture-the-flag exercise. It uses **fake secrets only** (`NOT_REAL_*`). Run the CTF only in
-> the provided `ctf-workspace/` sandbox. Never point these tools at real files or credentials,
-> and stop any network server when you're done.
+> ⚠️ **Educational use only.** In Task 3 you make your own server **deliberately vulnerable** and
+> attack it. It uses **fake secrets only** (`NOT_REAL_*`) and a planted `FLAG.txt`. Keep it to the
+> provided `server/` sandbox — never point these tools at real files or credentials — and stop any
+> network server when you're done.
 
 ---
 

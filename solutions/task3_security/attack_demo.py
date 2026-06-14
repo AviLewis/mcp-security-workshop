@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""attack_demo.py — Round A. Fire the three attacks at a CTF server over the real MCP loop.
+"""attack_demo.py — Round A. Fire the three attacks at your server over the real MCP loop.
 
 For each flag jot one line: "worked / didn't, because ___" — that sentence is the gate.
 

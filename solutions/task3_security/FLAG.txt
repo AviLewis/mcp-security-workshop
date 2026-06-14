@@ -1,5 +1,5 @@
 FLAG{path_traversal_pwned}
 
 If your agent read this through the MCP server, the tool was never confined to the
-workspace. This file lives ONE LEVEL ABOVE ctf-workspace/ on purpose — reaching it
+workspace. This file lives ONE LEVEL ABOVE workspace/ on purpose — reaching it
 with "../FLAG.txt" is the whole path-traversal exploit.
