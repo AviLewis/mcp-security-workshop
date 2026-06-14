@@ -19,7 +19,7 @@ Hands-on starter kit for the **MCP & Security** workshop. You'll build a real MC
 ```
 server/             ← YOUR server, reused across ALL three tasks: my_masterschool_mcp_server.py
                        (one tool to start) + workspace/ (notes.txt, README.md, meeting_notes.txt)
-                       + a planted fake.env (the "secret" Task 2 exposes; Task 3 attacks this server)
+                       + a planted example.env (the "secret" Task 2 exposes; Task 3 attacks this server)
 FLAG.txt            ← Task 3 path-traversal target — planted just OUTSIDE server/
 solutions/          ← ⛔ SPOILERS — the finished, runnable version of all three tasks
 ```
@@ -158,7 +158,7 @@ machine's agent.
    ```
    You'll see the `✅ … streamable-http … Uvicorn running on http://0.0.0.0:8000` banner and it holds
    the terminal — *this* is the process a partner (or you) connects to in steps 2–3. "The workspace"
-   stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file) **and** `fake.env`
+   stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file) **and** `example.env`
    (the planted secret that `list_workspace` never shows).
 
    > **Your server prints a startup banner.** `__main__` already calls `print_ready_banner(transport)`,
@@ -249,8 +249,8 @@ machine's agent.
    You should get back the owner's name, the workspace listing, and the file's contents — all fetched
    over the network from another machine's process. That's the Task 1 loop, now crossing a machine boundary.
 
-5. **The reveal:** the planted `server/fake.env` (fake secret) is readable too — even though
-   `list_workspace` never listed it. Predict whether your partner's agent can read `fake.env`, then
+5. **The reveal:** the planted `server/example.env` (fake secret) is readable too — even though
+   `list_workspace` never listed it. Predict whether your partner's agent can read `example.env`, then
    have them try. It can.
 
 > 🔍 **Why it "just works" off your machine — and the trap.** Binding `host="0.0.0.0"` *also turns off*
@@ -293,7 +293,7 @@ line: "worked / didn't, because ___"** — that sentence is the point.
 
 **Flag 1 is already exploitable** — `read_workspace_file` has done a naive `open(path)` since Task 1,
 so `../FLAG.txt` sails straight out of `server/`. (In Task 2 you saw the milder version: it read
-`fake.env`, just outside the `workspace/` sandbox. Same hole, bigger blast radius.)
+`example.env`, just outside the `workspace/` sandbox. Same hole, bigger blast radius.)
 
 **Flag 2 needs a tool first** — your server has no shell-exec tool yet. Add a deliberately convenient
 (and unsafe) one by hand, the way you added `name`/`list_workspace`:

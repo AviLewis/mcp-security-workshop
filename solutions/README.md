@@ -34,8 +34,8 @@ python test_hardening.py         # 8/8 checks pass
   `transport="streamable-http"`, run with `--http`), plus the comment on why `0.0.0.0` disables
   DNS-rebinding protection (and why `127.0.0.1` would break a tunnel/LAN client with `421`).
 - `server/client_http_demo.py` — a stand-in "peer" client to test the network read solo.
-- `server/fake.env` + `server/workspace/` — the planted "secret" and the "normal" file: a partner's
-  agent reads `workspace/README.md`, then `fake.env` (which `list_workspace` never showed) — the boundary.
+- `server/example.env` + `server/workspace/` — the planted "secret" and the "normal" file: a partner's
+  agent reads `workspace/README.md`, then `example.env` (which `list_workspace` never showed) — the boundary.
 - `task3_security/server_vulnerable.py` — your server (read_workspace_file + the count_lines tool you
   add in Task 3), still naive — the Task 3 starting point.
 - `task3_security/server_hardened.py` — the same server, holes closed: path canonicalization +

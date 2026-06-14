@@ -51,8 +51,8 @@ def list_workspace() -> list[str]:
     """List the files in the workspace/ folder."""
     sys.stderr.write("[tool call] list_workspace()\n")
     sys.stderr.flush()
-    # Scope to the workspace/ sandbox so the planted fake.env stays HIDDEN from this listing —
-    # yet read_workspace_file("fake.env") still reads it. That gap IS the Task 2 boundary.
+    # Scope to the workspace/ sandbox so the planted example.env stays HIDDEN from this listing —
+    # yet read_workspace_file("example.env") still reads it. That gap IS the Task 2 boundary.
     return sorted(f"workspace/{n}" for n in os.listdir("workspace"))
 
 

@@ -4,7 +4,7 @@
 This connects to a streamable-HTTP MCP server (yours, or a partner's) and:
   1. discovers the tools,
   2. reads a normal file,
-  3. reads the planted fake.env — the REVEAL: the server has no idea what
+  3. reads the planted example.env — the REVEAL: the server has no idea what
      "your workspace" means; it reads whatever the server PROCESS can read.
 
 Start the server first (in another terminal):
@@ -45,9 +45,9 @@ async def main(url: str) -> None:
             print("   " + _text(r).replace("\n", "\n   "))
 
             print(
-                "\n[peer-client] THE REVEAL — asking for the planted secret: fake.env"
+                "\n[peer-client] THE REVEAL — asking for the planted secret: example.env"
             )
-            r2 = await session.call_tool("read_workspace_file", {"path": "fake.env"})
+            r2 = await session.call_tool("read_workspace_file", {"path": "example.env"})
             print("   " + _text(r2).replace("\n", "\n   "))
 
     print(

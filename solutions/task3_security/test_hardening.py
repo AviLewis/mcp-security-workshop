@@ -23,10 +23,10 @@ def check(name: str, ok: bool) -> None:
 
 # --- legitimate use still works -------------------------------------------------
 try:
-    content = h.read_workspace_file("fake.env")
-    check("legit: read_workspace_file('fake.env') works", "API_KEY" in content)
+    content = h.read_workspace_file("example.env")
+    check("legit: read_workspace_file('example.env') works", "API_KEY" in content)
 except Exception as e:
-    check(f"legit: read_workspace_file('fake.env') works (raised {e!r})", False)
+    check(f"legit: read_workspace_file('example.env') works (raised {e!r})", False)
 
 try:
     out = h.count_lines("notes.txt")
