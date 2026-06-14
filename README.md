@@ -215,7 +215,9 @@ machine's agent.
    > **`zsh: command not found`?** None of these ship with your OS — install one. Easiest on macOS:
    > `brew install cloudflared` (no signup, no click-through — recommended), or `brew install ngrok`
    > (then add a free authtoken). `npx localtunnel --port 8000` needs only Node (npx fetches it on
-   > the fly), but loca.lt is flaky and shows a reminder page — **cloudflared is the smoothest.**
+   > the fly), but loca.lt is unreliable — it often just **hangs with no URL** (a blank line),
+   > especially behind a corporate proxy/VPN. **cloudflared is the smoothest; or skip the tunnel and
+   > use the LAN path (a) above.**
 
 3. **A partner connects to your URL — default to your LAN URL** (`http://<YOUR-LAN-IP>:8000/mcp`);
    use the tunnel URL only if you're not on the same network. **Note the `/mcp` path:**
