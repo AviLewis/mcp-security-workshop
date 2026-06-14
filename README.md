@@ -157,6 +157,8 @@ machine's agent.
    ```bash
    source .venv/bin/activate                       # new terminal? activate first, or `python` won't be found
    python server/my_masterschool_mcp_server.py     # prints a READY banner with URLs; Ctrl-C to stop
+   # stale/duplicate server, or port 8000 stuck? kill every copy and start fresh:
+   pkill -f my_masterschool_mcp_server
    ```
    It keeps running and listening — *this* is the process a partner (or you) connects to in steps 2–3.
    "The workspace" stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file)
@@ -192,9 +194,9 @@ machine's agent.
    can talk to it. You just need your LAN IP. Easiest source: **your server's startup banner prints
    it** (the `same Wi-Fi: http://<ip>:8000/mcp` line). Or look it up:
    ```bash
-   # macOS (robust — uses the active interface, not a guessed en0):
-   ipconfig getifaddr "$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')"
-   #   …or simply:  ipconfig getifaddr en0   (Wi-Fi)  /  en1   (wired)
+   ipconfig getifaddr en0          # macOS Wi-Fi (most common); if empty, try:  ipconfig getifaddr en1
+   # still nothing? list every IPv4 and pick your 192.168.x / 10.x address:
+   ifconfig | grep "inet " | grep -v 127.0.0.1
    #   Linux:    hostname -I | awk '{print $1}'
    #   Windows:  ipconfig   → "IPv4 Address"
    ```
