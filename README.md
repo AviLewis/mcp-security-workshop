@@ -354,9 +354,11 @@ authored a remote-code-execution hole in your own server — every tool you expo
 > (e.g. "command injection … shell execution") instead of `whoami`'s output, your Claude Code has a
 > **security guardrail** (the `agent-security-guardrails` plugin) that caught the injection
 > **client-side** — it never reached your server. That's real defense-in-depth (like Flag 3's refusal),
-> but it *masks* the point: **your server is still vulnerable.** Prove the server hole with a raw client
-> that has no guardrail: `python solutions/task3_security/attack_demo.py` calls the tool directly and
-> shows `whoami` actually running (`PWNED`). Takeaway: dropping `shell=True` is the *real* fix — an agent
+> but it *masks* the point: **your server is still vulnerable.** Prove it with a raw client that has no
+> guardrail — and you can do it **right inside Claude Code**: ask the agent to run
+> `python solutions/task3_security/attack_demo.py`. That's a *Bash subprocess* using its **own** MCP
+> client, so your agent's PreToolUse guardrail never inspects it — `count_lines` runs the injection and
+> you'll see `whoami` execute (`PWNED`). Takeaway: dropping `shell=True` is the *real* fix — an agent
 > guardrail is a backstop you can't assume every client has.
 
 **🚩 Flag 3 — indirect prompt injection.** Have your agent read `workspace/meeting_notes.txt` and
