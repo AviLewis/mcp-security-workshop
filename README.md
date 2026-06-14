@@ -162,10 +162,11 @@ machine's agent.
    "The workspace" stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file)
    **and** `fake.env` (the planted secret that `list_workspace` never shows).
 
-   > **Nice touch:** Uvicorn's log lines confirm it's up, but they're cryptic. Add a small
-   > `print_ready_banner()` function (see `solutions/server/my_masterschool_mcp_server.py`) and call
-   > it just before `mcp.run(...)` to print a clear "✅ server READY" line with your `localhost` and
-   > LAN URLs. Write it to **`sys.stderr`**, never `print()` — stdout carries the protocol in stdio mode.
+   > **Nice touch (already in your starter):** Uvicorn's log lines confirm it's up, but they're
+   > cryptic. Your server already defines a `print_ready_banner()` helper — call it just before
+   > `mcp.run(transport="streamable-http")` (the comment in `__main__` shows exactly where) to print
+   > a clear "✅ server READY" line with your localhost + LAN URLs. It writes to **`sys.stderr`**,
+   > never `print()` — stdout carries the protocol in stdio mode.
 
    > **What you're actually doing:** same server, same tools — you're only swapping the *transport*
    > (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
@@ -223,7 +224,10 @@ machine's agent.
    use the tunnel URL only if you're not on the same network. **Note the `/mcp` path:**
    ```bash
    claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
-   # not on the same network?  claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
+   # not on the same network? use your tunnel's URL (always add the /mcp path):
+   #   cloudflared:  claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
+   #   ngrok:        claude mcp add --transport http partner-box https://<rand>.ngrok-free.app/mcp
+   #   localtunnel:  claude mcp add --transport http partner-box https://<rand>.loca.lt/mcp
    # remove it (wrong URL / clean restart) — just the NAME, no flags/URL:  claude mcp remove partner-box
    ```
    Confirm Claude Code discovered it: `/mcp` should now list **partner-box** with its tools.
