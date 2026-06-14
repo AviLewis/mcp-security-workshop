@@ -162,6 +162,11 @@ machine's agent.
    "The workspace" stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file)
    **and** `fake.env` (the planted secret that `list_workspace` never shows).
 
+   > **Nice touch:** Uvicorn's log lines confirm it's up, but they're cryptic. Add a small
+   > `print_ready_banner()` function (see `solutions/server/my_masterschool_mcp_server.py`) and call
+   > it just before `mcp.run(...)` to print a clear "✅ server READY" line with your `localhost` and
+   > LAN URLs. Write it to **`sys.stderr`**, never `print()` — stdout carries the protocol in stdio mode.
+
    > **What you're actually doing:** same server, same tools — you're only swapping the *transport*
    > (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
    > a local subprocess and spoke over its private stdin/stdout pipe, so only this machine could reach

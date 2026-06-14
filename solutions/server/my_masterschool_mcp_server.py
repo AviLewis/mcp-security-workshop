@@ -68,28 +68,30 @@ def lan_ip() -> str:
         s.close()
 
 
+def print_ready_banner() -> None:
+    """Friendly 'server is up' banner — shows the URLs a client can connect to.
+
+    Always write to stderr, never stdout: in stdio mode (Task 1) stdout carries the
+    JSON-RPC protocol, so a stray print() there would corrupt it.
+    """
+    sys.stderr.write("\n" + "=" * 70 + "\n")
+    sys.stderr.write(
+        "✅ MCP server READY — streamable-http on 0.0.0.0:8000  (served at /mcp)\n"
+    )
+    sys.stderr.write("   local:       http://127.0.0.1:8000/mcp\n")
+    sys.stderr.write(f"   same Wi-Fi:  http://{lan_ip()}:8000/mcp\n")
+    sys.stderr.write(
+        "   public:      run a tunnel, e.g.  cloudflared tunnel --url http://localhost:8000\n"
+    )
+    sys.stderr.write("   leave this terminal running · Ctrl-C to stop\n")
+    sys.stderr.write("=" * 70 + "\n\n")
+    sys.stderr.flush()
+
+
 if __name__ == "__main__":
     # Task 1 = stdio (default). Task 2 = streamable-HTTP: run with `--http`.
     if "--http" in sys.argv:
-        sys.stderr.write("=" * 70 + "\n")
-        sys.stderr.write(
-            "[server] streamable-http bound on 0.0.0.0:8000  (served at /mcp)\n"
-        )
-        sys.stderr.write("[server] expose to the internet with a tunnel, e.g.:\n")
-        sys.stderr.write(
-            "[server]     cloudflared tunnel --url http://localhost:8000\n"
-        )
-        sys.stderr.write(
-            "[server]   then share:  https://<random>.trycloudflare.com/mcp\n"
-        )
-        sys.stderr.write(
-            f"[server] same Wi-Fi (no tunnel):     http://{lan_ip()}:8000/mcp\n"
-        )
-        sys.stderr.write(
-            "[server] local test URL:             http://127.0.0.1:8000/mcp\n"
-        )
-        sys.stderr.write("=" * 70 + "\n")
-        sys.stderr.flush()
+        print_ready_banner()
         mcp.run(transport="streamable-http")
     else:
         mcp.run()  # stdio — how Claude Code launches it in Task 1
