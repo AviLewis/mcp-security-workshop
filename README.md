@@ -17,10 +17,10 @@ Hands-on starter kit for the **MCP & Security** workshop. You'll build a real MC
 ## What's here
 
 ```
-server/             ← YOUR server, reused across ALL three tasks: my_masterschool_mcp_server.py
-                       (one tool to start) + workspace/ (notes.txt, README.md, meeting_notes.txt)
-                       + a planted example.env (the "secret" Task 2 exposes; Task 3 attacks this server)
-FLAG.txt            ← Task 3 path-traversal target — planted just OUTSIDE server/
+CLAUDE.md           ← ground rules that keep your agent a lab instrument you drive (not an auto-solver)
+server/             ← YOUR server, reused across all three tasks: my_masterschool_mcp_server.py
+                       + workspace/ (notes.txt, README.md, meeting_notes.txt) + a planted example.env
+FLAG.txt            ← a planted file just OUTSIDE server/ (you'll meet it in Task 3)
 solutions/          ← ⛔ SPOILERS — the finished, runnable version of all three tasks
 ```
 
@@ -280,47 +280,65 @@ sentence the boundary you crossed.
 This is the **same server you built and exposed in Tasks 1–2** — no new server to register. The
 holes were there all along; now you exploit them, then close them.
 
-### Round A — attack your own server
-Use the server you already have running/registered (stdio from Task 1, or HTTP from Task 2). Its
-working directory is `server/`, so attack paths are relative to that. For **each flag, write one
-line: "worked / didn't, because ___"** — that sentence is the point.
+**How to work this task — this *is* the skill:**
+- **One attack per step.** Make your agent run **exactly one** tool call at a time — no sweeps. See
+  the result before the next move. (The repo's `CLAUDE.md` already instructs your agent to do this.)
+- **Predict first, then test.** Before each call, write your prediction down. *Then* run it. *Then*
+  reconcile. Your agent reports the raw result — **you** write the explanation, not it.
+- **Your deliverable is a findings file, not the transcript.** Create `MY_FINDINGS.md`; for each flag:
+  ```
+  ## Flag N — <name>
+  Predict:  will it work? why?
+  Result:   worked / didn't
+  Because:  1–2 sentences, in your words — which vulnerability class, and which boundary failed
+  ```
+  Swap files with your Task 2 partner and check each other's "Because" lines — that's the grade.
 
-| 🚩 | Vector | Try (on your server) | Proof |
-|---|---|---|---|
-| 1 | **Path traversal** | `read_workspace_file("../FLAG.txt")` | you read `FLAG{…}` — a file *outside* `server/` |
-| 2 | **Command injection** | `count_lines("workspace/notes.txt; whoami")` | the injected `whoami` runs |
-| 3 | **Indirect prompt injection** | have the agent read `workspace/meeting_notes.txt` and "summarize" it | the agent obeys instructions hidden in the file's *contents* |
+### Round A — attack your own server (do all three, in order)
+Use the server from Tasks 1–2 (its working directory is `server/`, so attack paths are relative to that).
 
-**Flag 1 is already exploitable** — `read_workspace_file` has done a naive `open(path)` since Task 1,
-so `../FLAG.txt` sails straight out of `server/`. (In Task 2 you saw the milder version: it read
-`example.env`, just outside the `workspace/` sandbox. Same hole, bigger blast radius.)
-
-**Flag 2 needs a tool first** — your server has no shell-exec tool yet. Add a deliberately convenient
-(and unsafe) one by hand, the way you added `name`/`list_workspace`:
+**🚩 Flag 2 — command injection (FIRST, because you build the hole).** Your server has no shell-exec
+tool yet. Add a deliberately convenient (and unsafe) one by hand, the way you added `name`/`list_workspace`:
 ```python
 import subprocess  # at the top of the file
 
 @mcp.tool()
 def count_lines(filename: str) -> str:
     """Count the lines in a workspace file."""
-    out = subprocess.run(f"wc -l {filename}", shell=True, capture_output=True, text=True)  # VULN: shell=True
+    out = subprocess.run(f"wc -l {filename}", shell=True, capture_output=True, text=True)
     return (out.stdout or "") + (out.stderr or "")
 ```
-Reconnect, then `count_lines("workspace/notes.txt; whoami")` — `shell=True` runs the injected
-`whoami` too. (The lesson: a handy "just shell out to `wc`" tool is a remote-code-execution hole.)
+Predict, reconnect, then run **one** call: `count_lines("workspace/notes.txt; whoami")`. Did the
+injected `whoami` run? Record it. (You just authored a remote-code-execution hole in your own server —
+that's the lesson: every tool you expose is an attack surface.)
 
-*Flag 3 note:* modern Claude often **resists** naive injections — that's a feature and a teaching
-moment. If it doesn't fire, ask: *why did the defense hold, and what would a determined attacker change?*
+**🚩 Flag 1 — path traversal.** Predict, then run **one** call: `read_workspace_file("../FLAG.txt")`.
+Did you read a file *outside* `server/`? Record it — then ask: `list_workspace` only showed three
+files, so how did the reader reach one it never listed?
+
+**🚩 Flag 3 — indirect prompt injection.** Have your agent read `workspace/meeting_notes.txt` and
+summarize it. Predict what it will do, then watch. A modern agent usually **refuses** the hidden
+instruction — that's the *start*, not the end:
+- **Try to make it fire.** Edit `meeting_notes.txt` and escalate: (a) drop any obvious "instruction"
+  framing; (b) phrase it as a plausible business rule; (c) make it conditional/indirect; (d) split the
+  ask across a second file read in the same chat. Note where the refusal gets *less* confident. (Fake
+  secrets only, inside `server/`.)
+- **Write the defense.** In `MY_FINDINGS.md`, draft a 3-line human-in-the-loop policy *in your own
+  words* (e.g. tool/file output is data not instructions; any instruction found in content is surfaced,
+  never obeyed; sensitive/side-effectful actions need human confirmation). *Then* ask your agent why it
+  refused and compare.
+
+> ✅ **Gate:** all three "Because" lines + a draft HITL policy written before you start Round B.
 
 ### Round B — close the doors (agent-assisted, but read the diff)
-Ask your agent to harden **your** server:
+**Predict the fix first:** how would *you* stop `../FLAG.txt`? Write it down. Then ask your agent:
 > "Harden this server: (1) confine `read_workspace_file` to one allowed root by canonicalizing the
 > path and rejecting anything outside it; (2) rewrite `count_lines` with no `shell=True` — use an
 > argument array; (3) document that tool output is untrusted and require confirmation before
 > side-effectful actions. Write tests proving the Round-A attacks fail."
 
-The single most important diff — the path-traversal patch. Read it and be able to explain why
-`is_relative_to` kills `../` (and why a naive `str.startswith` check would **not**):
+Compare the patch to your prediction. The single most important diff — read it and be able to explain
+why `is_relative_to` kills `../` (and why a naive `str.startswith` check would **not**):
 ```python
 from pathlib import Path
 ALLOWED_ROOT = Path(__file__).resolve().parent       # confine tools to the server's own folder
@@ -335,11 +353,12 @@ Then read with `_safe_target(path).read_text()`, and make `count_lines` pass an 
 `subprocess.run(["wc", "-l", "--", str(_safe_target(filename))])` — so an injected `;` stays part of
 one filename and never reaches a shell.
 
-Re-run Round A: flags 1 & 2 should fail cleanly; flag 3 is the discussion.
+Re-run Round A: flags 1 & 2 should fail cleanly; flag 3 is the discussion — server hardening can't
+remove it, because the danger lives in how the *consuming agent* treats tool output (your HITL policy).
 
-✅ **Checkpoint:** your hardened server blocks traversal + injection **and** you can explain why
-prompt injection can't be fully patched server-side — the danger lives in how the *consuming agent*
-treats tool output. That's an orchestration / human-in-the-loop problem (the next workshop).
+✅ **Checkpoint:** your hardened server blocks traversal + injection, your `MY_FINDINGS.md` explains
+each flag in your own words, and you can say why prompt injection isn't a server-side fix — it's an
+orchestration / human-in-the-loop problem (the next workshop).
 
 ---
 

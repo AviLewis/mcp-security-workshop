@@ -1,35 +1,25 @@
-# my_masterschool_mcp_server.py — read every line; understand it before you run it.
-#
-# This is the Task 1 starter. You will NOT generate it with an agent — you read it,
-# run it, and change it. It exposes ONE tool and runs over stdio (Task 1), or over
-# streamable-HTTP when you launch it with the --http flag (Task 2).
-from pathlib import Path
-from mcp.server.fastmcp import FastMCP
 import os
 import socket
 import sys
+from pathlib import Path
 
-# Set the current working directory to this file's folder so relative paths resolve.
+from mcp.server.fastmcp import FastMCP
+
 os.chdir(Path(__file__).resolve().parent)
 
-mcp = FastMCP(
-    "my_masterschool_mcp_server", host="0.0.0.0", port=8000
-)  # host/port are used only for --http (Task 2); stdio (Task 1) ignores them
+mcp = FastMCP("my_masterschool_mcp_server", host="0.0.0.0", port=8000)
 
 
-@mcp.tool()  # this decorator is what makes the function DISCOVERABLE
+@mcp.tool()
 def read_workspace_file(path: str) -> str:
     """Read and return the contents of a file in the workspace."""
-    sys.stderr.write(
-        f"[tool call] read_workspace_file(path={path!r})\n"
-    )  # so you SEE invocation
+    sys.stderr.write(f"[tool call] read_workspace_file(path={path!r})\n")
     sys.stderr.flush()
-    with open(path) as f:  # deliberately naive — we exploit and fix this in Task 3
+    with open(path) as f:
         return f.read()
 
 
 def lan_ip() -> str:
-    """Best-effort LAN IP (opens a UDP socket but sends nothing)."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         s.connect(("8.8.8.8", 80))
@@ -41,19 +31,11 @@ def lan_ip() -> str:
 
 
 def print_ready_banner(transport: str) -> None:
-    """Print a 'server is up' banner tailored to the transport. Always prints.
-
-    Always write to stderr, never stdout — in stdio mode stdout carries the JSON-RPC protocol,
-    so a stray print() there would corrupt it. stderr is safe (Claude Code shows it in MCP logs).
-    """
     sys.stderr.write("\n" + "=" * 70 + "\n")
     if transport == "stdio":
         sys.stderr.write("✅ MCP server READY — stdio transport (local)\n")
         sys.stderr.write(
-            "   Claude Code talks to this over stdin/stdout — there is no URL, and if\n"
-        )
-        sys.stderr.write(
-            "   you ran it by hand it just waits silently. That's correct for stdio.\n"
+            "   Claude Code talks to this over stdin/stdout; there is no URL.\n"
         )
     else:
         sys.stderr.write(
@@ -67,10 +49,6 @@ def print_ready_banner(transport: str) -> None:
 
 
 if __name__ == "__main__":
-    # Task 1: stdio (default) — Claude Code launches it this way.
-    # Task 2: run it yourself WITH the --http flag to serve over streamable-HTTP:
-    #             python server/my_masterschool_mcp_server.py --http
-    # (Without --http it runs stdio and opens NO port — the #1 "can't connect" cause.)
     transport = "streamable-http" if "--http" in sys.argv else "stdio"
     print_ready_banner(transport)
     mcp.run(transport=transport)
