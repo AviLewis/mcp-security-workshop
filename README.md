@@ -254,18 +254,11 @@ machine's agent.
    You should get back the owner's name, the workspace listing, and the file's contents — all fetched
    over the network from another machine's process. That's the Task 1 loop, now crossing a machine boundary.
 
-5. **The reveal:** the planted `server/example.env` (fake secret) is readable too — even though
-   `list_workspace` never listed it. Predict whether your partner's agent can read `example.env`, then
-   have them try. It can.
-
 > 🔍 **Why it "just works" off your machine — and the trap.** Binding `host="0.0.0.0"` *also turns off*
 > the MCP SDK's **DNS-rebinding protection**, so the server accepts requests with *any* `Host`
 > header — including your tunnel's domain or your LAN IP. If you "harden" by switching to `host="127.0.0.1"`,
 > the SDK only allows a `localhost` Host and a tunnel/LAN connection dies with **`421 Misdirected Request`** —
 > a *security control* that looks exactly like a network bug. Convenience vs. safety, in one line.
-
-> 🛑 **Stop the server (and any tunnel)** when you're done — don't leave a file-reader listening
-> on your network or the internet.
 
 **Rehearse solo (no partner)?** Be the "peer" client against your own server:
 `python solutions/server/client_http_demo.py http://127.0.0.1:8000/mcp`.
@@ -285,6 +278,11 @@ sentence the boundary you crossed.
 
 This is the **same server you built and exposed in Tasks 1–2** — no new server to register. The
 holes were there all along; now you exploit them, then close them.
+
+**Warm-up — the Task 2 reveal:** point your agent at a server and run
+`read_workspace_file("example.env")`. It reads the planted secret **even though `list_workspace`
+never listed it** (`example.env` sits beside `workspace/`, not inside it). That gap — *listed ≠
+reachable* — is the boundary Round A blows wide open.
 
 **Who does what — read this first:**
 - **You add the vulnerable `count_lines` tool to YOUR OWN server** (`server/my_masterschool_mcp_server.py`).
@@ -400,3 +398,9 @@ python test_hardening.py        # 8/8 checks pass
 1. Which flag was easiest to land, and which was hardest to patch?
 2. Where did the agent have an easier time — building the server, or attacking one?
 3. What's one tool *your* product's server exposes that you now realize is a door you'd lock?
+
+---
+
+> 🛑 **When you're done:** stop every server and tunnel — `pkill -f my_masterschool_mcp_server`, and
+> Ctrl-C any cloudflared/ngrok/localtunnel. Don't leave a file-reader listening on your network or
+> the internet.
