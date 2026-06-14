@@ -316,6 +316,16 @@ reachable* — is the boundary Round A blows wide open.
 Run against your own server (or a partner's `partner-box`, per "who does what" above). The server's
 working directory is `server/`, so attack paths are relative to that.
 
+> **🔁 Edited the server (added a tool, or hardened it)? Cycle it — or you'll keep hitting the OLD code.**
+> Your HTTP server is a long-running process, so code changes don't apply until you:
+> ```bash
+> pkill -f my_masterschool_mcp_server                    # 0. stop the running server
+> python server/my_masterschool_mcp_server.py --http     # 1. restart it (picks up your edits)
+> ```
+> then **2. reconnect the client** — in Claude Code: `/mcp` → your server → **Reconnect** (or
+> `claude mcp remove <name>` then re-`add` it). (Task 1's stdio server is the exception: there a plain
+> `/mcp` → Reconnect relaunches it for you.)
+
 **🚩 Flag 1 — path traversal.** Predict, then run **one** call: `read_workspace_file("../FLAG.txt")`.
 Did you read a file *outside* `server/`? Record it — then ask: `list_workspace` only showed three files,
 so how did the reader reach one it never listed? (No setup needed — this hole has been in
@@ -332,9 +342,9 @@ def count_lines(filename: str) -> str:
     out = subprocess.run(f"wc -l {filename}", shell=True, capture_output=True, text=True)
     return (out.stdout or "") + (out.stderr or "")
 ```
-Reconnect, predict, then run **one** call: `count_lines("workspace/notes.txt; whoami")`. Did the injected
-`whoami` run? Record it. (You just authored a remote-code-execution hole in your own server — every tool
-you expose is an attack surface.)
+**Restart + reconnect** (the 🔁 note above — you just changed the code), predict, then run **one** call:
+`count_lines("workspace/notes.txt; whoami")`. Did the injected `whoami` run? Record it. (You just
+authored a remote-code-execution hole in your own server — every tool you expose is an attack surface.)
 
 **🚩 Flag 3 — indirect prompt injection.** Have your agent read `workspace/meeting_notes.txt` and
 summarize it. Predict what it will do, then watch. A modern agent usually **refuses** the hidden
@@ -373,8 +383,9 @@ Then read with `_safe_target(path).read_text()`, and make `count_lines` pass an 
 `subprocess.run(["wc", "-l", "--", str(_safe_target(filename))])` — so an injected `;` stays part of
 one filename and never reaches a shell.
 
-Re-run Round A: flags 1 & 2 should fail cleanly; flag 3 is the discussion — server hardening can't
-remove it, because the danger lives in how the *consuming agent* treats tool output (your HITL policy).
+**Restart + reconnect** (the 🔁 note above — you just changed the code), then re-run Round A: flags 1 & 2
+should fail cleanly; flag 3 is the discussion — server hardening can't remove it, because the danger
+lives in how the *consuming agent* treats tool output (your HITL policy).
 
 ✅ **Checkpoint:** your hardened server blocks traversal + injection, your `MY_FINDINGS.md` explains
 each flag in your own words, and you can say why prompt injection isn't a server-side fix — it's an
