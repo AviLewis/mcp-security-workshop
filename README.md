@@ -242,10 +242,13 @@ machine's agent.
    ```
    Confirm Claude Code discovered it: `/mcp` should now list **partner-box** with its tools.
 
-4. **Test the tools on the box you just connected to.** In Claude Code, paste a prompt that exercises
-   each tool on `partner-box` so you can watch the round-trip work:
-   > "On **partner-box**, call `name` to see whose server this is, then `list_workspace` to list its
-   > files, then use `read_workspace_file` to read `workspace/README.md`. Show me each result."
+4. **Test the tools on the box you just connected to** — run each as its **own prompt**, one at a
+   time, so you see each round-trip on its own. In Claude Code:
+   > "On partner-box, call name."
+
+   > "On partner-box, call list_workspace."
+
+   > "On partner-box, use read_workspace_file to read workspace/README.md."
 
    You should get back the owner's name, the workspace listing, and the file's contents — all fetched
    over the network from another machine's process. That's the Task 1 loop, now crossing a machine boundary.
