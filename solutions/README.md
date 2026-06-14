@@ -40,7 +40,9 @@ python test_hardening.py         # 8/8 checks pass
   root is this same server *before* those tools) and the Task 2 transport swap (`host="0.0.0.0"` +
   `transport="streamable-http"`, run with `--http`), plus the comment on why `0.0.0.0` disables
   DNS-rebinding protection (and why `127.0.0.1` would break a tunnel/LAN client with `421`).
-- `server/client_http_demo.py` — a stand-in "peer" client to test the network read solo.
+- `server/client_http_demo.py` — a raw "peer" client to test the network read solo; with `--attack`
+  it fires the path-traversal + command-injection proofs straight at any `--http` server (no agent, so
+  no guardrail in the way) — e.g. `python solutions/server/client_http_demo.py --attack http://127.0.0.1:8000/mcp`.
 - `server/example.env` + `server/workspace/` — the planted "secret" and the "normal" file: a partner's
   agent reads `workspace/README.md`, then `example.env` (which `list_workspace` never showed) — the boundary.
 - `task3_security/server_vulnerable.py` — your server (read_workspace_file + the count_lines tool you
