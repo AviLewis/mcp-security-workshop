@@ -21,6 +21,7 @@ CLAUDE.md           ← ground rules that keep your agent a lab instrument you d
 server/             ← YOUR server, reused across all three tasks: my_masterschool_mcp_server.py
                        + workspace/ (notes.txt, README.md, meeting_notes.txt) + a planted example.env
 FLAG.txt            ← a planted file just OUTSIDE server/ (you'll meet it in Task 3)
+MY_FINDINGS.md      ← Task 3 worksheet — fill one block per flag (your graded deliverable)
 solutions/          ← ⛔ SPOILERS — the finished, runnable version of all three tasks
 ```
 
@@ -300,8 +301,9 @@ holes were there all along; now you exploit them, then close them.
   `CLAUDE.md` already tells it to.)
 - **Predict first, then test.** Before each call write your prediction; run it; reconcile. Your agent
   reports the raw result — **you** write the explanation.
-- **Your deliverable is `MY_FINDINGS.md`, not the transcript.** Create that file and write one block per
-  flag — predict *before* the attack, fill result + "because" *after*. A filled block looks like:
+- **Your deliverable is `MY_FINDINGS.md`, not the transcript.** A blank `MY_FINDINGS.md` is already in
+  the repo — just open it and fill one block per flag (predict *before* the attack, result + "because"
+  *after*). A filled block looks like:
   ```markdown
   ## Flag 1 — path traversal
   Predict: Yes — read_workspace_file is open(path) with no checks, so "../" should escape server/.
