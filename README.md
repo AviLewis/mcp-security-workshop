@@ -285,27 +285,44 @@ sentence the boundary you crossed.
 This is the **same server you built and exposed in Tasks 1–2** — no new server to register. The
 holes were there all along; now you exploit them, then close them.
 
-**How to work this task — this *is* the skill:**
-- **One attack per step.** Make your agent run **exactly one** tool call at a time — no sweeps. See
-  the result before the next move. (The repo's `CLAUDE.md` already instructs your agent to do this.)
-- **Predict first, then test.** Before each call, write your prediction down. *Then* run it. *Then*
-  reconcile. Your agent reports the raw result — **you** write the explanation, not it.
-- **Your deliverable is a findings file, not the transcript.** Create `MY_FINDINGS.md`; for each flag:
-  ```
-  ## Flag N — <name>
-  Predict:  will it work? why?
-  Result:   worked / didn't
-  Because:  1–2 sentences, in your words — which vulnerability class, and which boundary failed
-  ```
-  Swap files with your Task 2 partner and check each other's "Because" lines — that's the grade.
+**Who does what — read this first:**
+- **You add the vulnerable `count_lines` tool to YOUR OWN server** (`server/my_masterschool_mcp_server.py`).
+  *You* author the hole — that's the point.
+- **You run the attacks (via your agent) against a *running* server.** Simplest is **your own** — you
+  have the tools and the planted files, so it's fully self-contained. For the realistic cross-machine
+  version, pair up and attack each other's `partner-box` from Task 2 — but note: **command injection
+  only works if the target server actually exposes `count_lines`, so both partners must add it first.**
+  Path traversal and prompt injection work on any of these servers as-is.
+- **You harden YOUR OWN server** in Round B.
 
-### Round A — attack the server (do all three, in order)
-Use the server from Tasks 1–2 (its working directory is `server/`, so attack paths are relative to
-that). Fire these at **your own** server, or at a **partner's** `partner-box` from Task 2 — the same
-holes are in theirs. (Either way you'll harden your **own** server in Round B.)
+**How to work it — this *is* the skill:**
+- **One attack per step.** Your agent runs exactly one tool call at a time — no sweeps. (The repo's
+  `CLAUDE.md` already tells it to.)
+- **Predict first, then test.** Before each call write your prediction; run it; reconcile. Your agent
+  reports the raw result — **you** write the explanation.
+- **Your deliverable is `MY_FINDINGS.md`, not the transcript.** Create that file and write one block per
+  flag — predict *before* the attack, fill result + "because" *after*. A filled block looks like:
+  ```markdown
+  ## Flag 1 — path traversal
+  Predict: Yes — read_workspace_file is open(path) with no checks, so "../" should escape server/.
+  Result:  worked — read FLAG{path_traversal_pwned}
+  Because: Path traversal (CWE-22). The sandbox boundary failed: open() honors any path the process
+           can reach, so "../" walks out of server/. A scoped list_workspace gave false confidence.
+  ```
+  Do the same for Flags 2 and 3 (three blocks total). Then swap files with your Task 2 partner and check
+  each other's "Because" lines — **that's the grade: can you *explain* it, not just land it.**
 
-**🚩 Flag 2 — command injection (FIRST, because you build the hole).** Your server has no shell-exec
-tool yet. Add a deliberately convenient (and unsafe) one by hand, the way you added `name`/`list_workspace`:
+### Round A — attack (do all three, in order)
+Run against your own server (or a partner's `partner-box`, per "who does what" above). The server's
+working directory is `server/`, so attack paths are relative to that.
+
+**🚩 Flag 1 — path traversal.** Predict, then run **one** call: `read_workspace_file("../FLAG.txt")`.
+Did you read a file *outside* `server/`? Record it — then ask: `list_workspace` only showed three files,
+so how did the reader reach one it never listed? (No setup needed — this hole has been in
+`read_workspace_file` since Task 1.)
+
+**🚩 Flag 2 — command injection.** Needs a tool first: **add a deliberately unsafe `count_lines` to your
+own server**, the way you hand-added `name`/`list_workspace`:
 ```python
 import subprocess  # at the top of the file
 
@@ -315,13 +332,9 @@ def count_lines(filename: str) -> str:
     out = subprocess.run(f"wc -l {filename}", shell=True, capture_output=True, text=True)
     return (out.stdout or "") + (out.stderr or "")
 ```
-Predict, reconnect, then run **one** call: `count_lines("workspace/notes.txt; whoami")`. Did the
-injected `whoami` run? Record it. (You just authored a remote-code-execution hole in your own server —
-that's the lesson: every tool you expose is an attack surface.)
-
-**🚩 Flag 1 — path traversal.** Predict, then run **one** call: `read_workspace_file("../FLAG.txt")`.
-Did you read a file *outside* `server/`? Record it — then ask: `list_workspace` only showed three
-files, so how did the reader reach one it never listed?
+Reconnect, predict, then run **one** call: `count_lines("workspace/notes.txt; whoami")`. Did the injected
+`whoami` run? Record it. (You just authored a remote-code-execution hole in your own server — every tool
+you expose is an attack surface.)
 
 **🚩 Flag 3 — indirect prompt injection.** Have your agent read `workspace/meeting_notes.txt` and
 summarize it. Predict what it will do, then watch. A modern agent usually **refuses** the hidden
