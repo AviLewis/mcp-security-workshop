@@ -197,11 +197,12 @@ machine's agent.
    #   Linux:    hostname -I | awk '{print $1}'
    #   Windows:  ipconfig   → "IPv4 Address"
    ```
-   Share `http://<YOUR-LAN-IP>:8000/mcp` (this is the URL your partner uses in step 3). Caveats: you
-   must both be on the **same network**; it must **not** isolate devices (guest/corporate Wi-Fi often
-   blocks device-to-device — "AP/client isolation"); and your OS firewall must allow inbound TCP
-   **8000** (macOS may prompt "accept incoming connections?" the first time — click **Allow**).
-   Nothing leaves your LAN — no internet round-trip.
+   **Share `http://<YOUR-LAN-IP>:8000/mcp` — this is the URL your partner uses in step 3.**
+
+   > **Caveats for the LAN path:** you must both be on the **same network**; it must **not** isolate
+   > devices (guest/corporate Wi-Fi often blocks device-to-device — "AP/client isolation"); and your
+   > OS firewall must allow inbound TCP **8000** (macOS may prompt "accept incoming connections?" the
+   > first time — click **Allow**). Nothing leaves your LAN — no internet round-trip.
 
    **(b) Public internet — a tunnel (only if you're *not* on the same network).** To cross
    NAT/firewalls or hand out a public URL, run one tunnel (you only need one); each prints a public
