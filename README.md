@@ -298,9 +298,12 @@ reachable* — is the boundary Round A blows wide open.
   `CLAUDE.md` already tells it to.)
 - **Predict first, then test.** Before each call write your prediction; run it; reconcile. Your agent
   reports the raw result — **you** write the explanation.
-- **Your deliverable is `MY_FINDINGS.md`, not the transcript.** A blank `MY_FINDINGS.md` is already in
-  the repo — just open it and fill one block per flag (predict *before* the attack, result + "because"
-  *after*). A filled block looks like:
+- **Your deliverable is `MY_FINDINGS.md`, not the transcript — and your agent fills it in *with* you,
+  live.** A blank `MY_FINDINGS.md` is in the repo; for each attack your agent will: **(1)** ask your
+  prediction, **(2)** run the one call and show the result, **(3)** ask *why* it happened — then **log
+  your prediction + result + "because" into `MY_FINDINGS.md`** and tell you ("Logged Flag N →
+  MY_FINDINGS.md"). The words are **yours** (it's the scribe, not the author); edit the file directly
+  any time. A finished block looks like:
   ```markdown
   ## Flag 1 — path traversal
   Predict: Yes — read_workspace_file is open(path) with no checks, so "../" should escape server/.
@@ -308,8 +311,8 @@ reachable* — is the boundary Round A blows wide open.
   Because: Path traversal (CWE-22). The sandbox boundary failed: open() honors any path the process
            can reach, so "../" walks out of server/. A scoped list_workspace gave false confidence.
   ```
-  Do the same for Flags 2 and 3 (three blocks total). Then swap files with your Task 2 partner and check
-  each other's "Because" lines — **that's the grade: can you *explain* it, not just land it.**
+  Three blocks total. Then swap files with your Task 2 partner and check each other's "Because" lines —
+  **that's the grade: can you *explain* it, not just land it.**
 
 ### Round A — attack (do all three, in order)
 Run against your own server (or a partner's `partner-box`, per "who does what" above). The server's
@@ -357,7 +360,9 @@ authored a remote-code-execution hole in your own server — every tool you expo
 > point: **your server is still vulnerable** — the guardrail only protected *this* agent's call, not
 > the server itself.
 
-**🚩 Flag 3 — indirect prompt injection.** Have your agent read `workspace/meeting_notes.txt` and
+**🚩 Flag 3 — indirect prompt injection.** Have your agent read `workspace/meeting_notes.txt`
+**through your MCP server** — i.e. via `read_workspace_file` (not by opening the file off disk), so the
+content arrives as a *tool result*, exactly how a hostile file reaches an agent in the wild — and
 summarize it. Predict what it will do, then watch. A modern agent usually **refuses** the hidden
 instruction — that's the *start*, not the end:
 - **Try to make it fire.** Edit `meeting_notes.txt` and escalate: (a) drop any obvious "instruction"

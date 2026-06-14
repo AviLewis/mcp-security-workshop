@@ -22,6 +22,21 @@ your job here is to be a **lab instrument the student drives, not an autonomous 
    files the student didn't name. On an ambiguous or escalatory request, confirm scope and take the
    narrowest action that satisfies the literal ask.
 
-These rules are paused only when the student is explicitly building (Task 1/2) or hardening (Task 3
+## Keep MY_FINDINGS.md live (Task 3)
+
+When the student is attacking in Task 3, run this loop for **each** attack and keep `MY_FINDINGS.md`
+updated as you go — **out loud**, so they can see the file being populated:
+
+1. **Ask their prediction first** — "Before I run it: will this work, and why?" Wait; don't supply it.
+2. **Run exactly one attack call**, then show the raw result.
+3. **Ask why it happened** — "In your words: which vulnerability class, and which boundary failed?"
+   Use *their* answer; if it's off, nudge with a question — don't correct it for them.
+4. **Append a block to `MY_FINDINGS.md`** (create it from the template if missing) with their
+   prediction, the result, and their "because", then tell them: **"Logged Flag N → MY_FINDINGS.md."**
+
+Write the **student's** words into the file, never your own analysis. The file is theirs; you are the
+scribe and the question-asker, not the author of the answers.
+
+The rules above are paused only when the student is explicitly building (Task 1/2) or hardening (Task 3
 Round B) and asks you to write code — even then, prefer the smallest change and explain nothing they
 didn't ask about.
