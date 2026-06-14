@@ -274,12 +274,13 @@ sentence the boundary you crossed.
 
 ---
 
-## Task 3 — Break it, then close the door (attack your *own* server, then harden)
+## Task 3 — Break it, then close the door (attack a server, then harden your *own*)
 
-> ⚠️ **Safety box.** Everything here targets **your own `server/`**, with **fake secrets only**
-> (`NOT_REAL_*`). The path-traversal target `FLAG.txt` is a planted file just *outside* `server/`.
-> The command-injection proof is harmless (`whoami`). Never point these tools at real files, and
-> stop the server when you're done.
+> ⚠️ **Safety box.** Attack **only** the workshop servers — your own `server/`, or a **partner's**
+> (with their OK), just like Task 2. Everything is **fake secrets only** (`NOT_REAL_*`): the
+> path-traversal target `FLAG.txt` is a planted file just *outside* `server/`, and the
+> command-injection proof is harmless (`whoami`). Never point these tools at real files or
+> credentials, and stop the server when you're done.
 
 This is the **same server you built and exposed in Tasks 1–2** — no new server to register. The
 holes were there all along; now you exploit them, then close them.
@@ -298,8 +299,10 @@ holes were there all along; now you exploit them, then close them.
   ```
   Swap files with your Task 2 partner and check each other's "Because" lines — that's the grade.
 
-### Round A — attack your own server (do all three, in order)
-Use the server from Tasks 1–2 (its working directory is `server/`, so attack paths are relative to that).
+### Round A — attack the server (do all three, in order)
+Use the server from Tasks 1–2 (its working directory is `server/`, so attack paths are relative to
+that). Fire these at **your own** server, or at a **partner's** `partner-box` from Task 2 — the same
+holes are in theirs. (Either way you'll harden your **own** server in Round B.)
 
 **🚩 Flag 2 — command injection (FIRST, because you build the hole).** Your server has no shell-exec
 tool yet. Add a deliberately convenient (and unsafe) one by hand, the way you added `name`/`list_workspace`:
