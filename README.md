@@ -224,6 +224,7 @@ machine's agent.
    ```bash
    claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
    # not on the same network?  claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
+   # remove it (wrong URL / clean restart) — just the NAME, no flags/URL:  claude mcp remove partner-box
    ```
    Confirm Claude Code discovered it: `/mcp` should now list **partner-box** with its tools.
 
