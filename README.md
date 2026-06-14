@@ -320,10 +320,11 @@ working directory is `server/`, so attack paths are relative to that.
 > ```bash
 > pkill -f my_masterschool_mcp_server                    # 0. stop the running server
 > python server/my_masterschool_mcp_server.py --http     # 1. restart it (picks up your edits)
+> # 2. reconnect the client — in Claude Code: /mcp → partner-box → Reconnect, OR re-add it:
+> claude mcp remove partner-box
+> claude mcp add --transport http partner-box http://127.0.0.1:8000/mcp   # a partner's URL if attacking theirs
 > ```
-> then **2. reconnect the client** — in Claude Code: `/mcp` → your server → **Reconnect** (or
-> `claude mcp remove <name>` then re-`add` it). (Task 1's stdio server is the exception: there a plain
-> `/mcp` → Reconnect relaunches it for you.)
+> (Task 1's stdio server is the exception: there a plain `/mcp` → Reconnect relaunches it for you.)
 
 **🚩 Flag 1 — path traversal.** Predict, then run **one** call: `read_workspace_file("../FLAG.txt")`.
 Did you read a file *outside* `server/`? Record it — then ask: `list_workspace` only showed three files,
