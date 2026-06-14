@@ -151,22 +151,21 @@ machine's agent.
    or recreate it, you just change how it's reached. Ask your agent:
    > "Change my MCP server to **streamable HTTP** on host `0.0.0.0`, port `8000`, served at `/mcp`."
 
-   The change is `FastMCP(..., host="0.0.0.0", port=8000)` + `mcp.run(transport="streamable-http")`.
-   Then **run the server and leave it running in its own terminal** (it `os.chdir`s to its own
-   folder, so launch it from anywhere):
+   Two edits: add `host="0.0.0.0", port=8000` to the `FastMCP(...)` call, and set
+   `transport = "streamable-http"` in `__main__`. Then **run the server and leave it running in its
+   own terminal** (it `os.chdir`s to its own folder, so launch it from anywhere):
    ```bash
    source .venv/bin/activate                       # new terminal? activate first, or `python` won't be found
-   python server/my_masterschool_mcp_server.py     # prints its URLs; Ctrl-C to stop when done
+   python server/my_masterschool_mcp_server.py     # prints a READY banner with URLs; Ctrl-C to stop
    ```
    It keeps running and listening — *this* is the process a partner (or you) connects to in steps 2–3.
    "The workspace" stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file)
    **and** `fake.env` (the planted secret that `list_workspace` never shows).
 
-   > **Nice touch (already in your starter):** Uvicorn's log lines confirm it's up, but they're
-   > cryptic. Your server already defines a `print_ready_banner()` helper — call it just before
-   > `mcp.run(transport="streamable-http")` (the comment in `__main__` shows exactly where) to print
-   > a clear "✅ server READY" line with your localhost + LAN URLs. It writes to **`sys.stderr`**,
-   > never `print()` — stdout carries the protocol in stdio mode.
+   > **Your server prints a startup banner.** `__main__` already calls `print_ready_banner(transport)`,
+   > which **always prints** a clear "✅ server READY" line tailored to the transport — a "stdio, no
+   > URL" note in Task 1, your localhost + LAN URLs in Task 2. It writes to **`sys.stderr`**, never
+   > `print()` (stdout carries the protocol in stdio mode), so it's safe either way.
 
    > **What you're actually doing:** same server, same tools — you're only swapping the *transport*
    > (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
@@ -177,24 +176,25 @@ machine's agent.
    > path the protocol is served at. That's also why *you* start it now and leave it running — with
    > stdio, Claude Code launched it on demand.
 
-   > **🩺 Ran it and it just sits there blank — or a client says "unable to connect" to `:8000`?**
-   > You're still running the **stdio** server (`mcp.run()` with no args): stdio prints nothing and
-   > opens **no port**, so there's nothing on 8000 to connect to. Make the swap above
-   > (`host="0.0.0.0", port=8000` + `transport="streamable-http"`) — the HTTP server instead prints
-   > `INFO: Uvicorn running on http://0.0.0.0:8000` and stays listening. Confirm it's actually up with
-   > `lsof -nP -iTCP:8000 -sTCP:LISTEN` (should show your `python`). Stray blank stdio servers you
-   > started by hand do nothing useful — clear leftovers with `pkill -f my_masterschool_mcp_server`.
+   > **🩺 A client says "unable to connect" to `:8000`?** Your server is running on **stdio**, which
+   > opens **no port** — so there's nothing on 8000. (Its banner even says "stdio transport … there is
+   > no URL.") Do the swap above (`host="0.0.0.0", port=8000` + `transport="streamable-http"`); the
+   > banner then shows your URLs and the server keeps listening on `0.0.0.0:8000`. Confirm with
+   > `lsof -nP -iTCP:8000 -sTCP:LISTEN` (should show your `python`). Clear stray stdio servers you
+   > started by hand with `pkill -f my_masterschool_mcp_server`.
 
 2. **Expose it — default to your local Wi-Fi network.** Both paths below serve the same `/mcp` over
    the same HTTP transport, but **(a) the local network is the default for this workshop** — simplest,
    no extra tools. Use **(b) a tunnel** only if you and your partner aren't on the same network.
 
-   **(a) Local network (same Wi-Fi) — the default.** With your server from step 1 **running**
-   (`python server/my_masterschool_mcp_server.py`), it already binds `0.0.0.0:8000` (every
-   interface) — so anyone on your Wi-Fi who can reach your machine can talk to it. You just need your
-   LAN IP and an open port:
+   **(a) Local network (same Wi-Fi) — the default.** With your server from step 1 **running**, it
+   already binds `0.0.0.0:8000` (every interface) — so anyone on your Wi-Fi who can reach your machine
+   can talk to it. You just need your LAN IP. Easiest source: **your server's startup banner prints
+   it** (the `same Wi-Fi: http://<ip>:8000/mcp` line). Or look it up:
    ```bash
-   ipconfig getifaddr en0          # macOS Wi-Fi → e.g. 192.168.1.33   (try en1 for wired)
+   # macOS (robust — uses the active interface, not a guessed en0):
+   ipconfig getifaddr "$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')"
+   #   …or simply:  ipconfig getifaddr en0   (Wi-Fi)  /  en1   (wired)
    #   Linux:    hostname -I | awk '{print $1}'
    #   Windows:  ipconfig   → "IPv4 Address"
    ```
@@ -204,6 +204,11 @@ machine's agent.
    > devices (guest/corporate Wi-Fi often blocks device-to-device — "AP/client isolation"); and your
    > OS firewall must allow inbound TCP **8000** (macOS may prompt "accept incoming connections?" the
    > first time — click **Allow**). Nothing leaves your LAN — no internet round-trip.
+
+   > **On a VPN / corporate network?** If the commands above print nothing (or only a `192.0.0.x` /
+   > `100.x` tunnel address), you have no real LAN — device-to-device won't work. Either drop off the
+   > VPN onto plain Wi-Fi, use a **tunnel** (b), or just test solo against `http://127.0.0.1:8000/mcp`
+   > (localhost always works, no LAN IP needed).
 
    **(b) Public internet — a tunnel (only if you're *not* on the same network).** To cross
    NAT/firewalls or hand out a public URL, run one tunnel (you only need one); each prints a public

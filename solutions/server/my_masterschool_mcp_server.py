@@ -68,30 +68,37 @@ def lan_ip() -> str:
         s.close()
 
 
-def print_ready_banner() -> None:
-    """Friendly 'server is up' banner — shows the URLs a client can connect to.
+def print_ready_banner(transport: str) -> None:
+    """Print a 'server is up' banner tailored to the transport. Always prints.
 
-    Always write to stderr, never stdout: in stdio mode (Task 1) stdout carries the
-    JSON-RPC protocol, so a stray print() there would corrupt it.
+    Always write to stderr, never stdout: in stdio mode stdout carries the JSON-RPC
+    protocol, so a stray print() there would corrupt it. stderr is safe.
     """
     sys.stderr.write("\n" + "=" * 70 + "\n")
-    sys.stderr.write(
-        "✅ MCP server READY — streamable-http on 0.0.0.0:8000  (served at /mcp)\n"
-    )
-    sys.stderr.write("   local:       http://127.0.0.1:8000/mcp\n")
-    sys.stderr.write(f"   same Wi-Fi:  http://{lan_ip()}:8000/mcp\n")
-    sys.stderr.write(
-        "   public:      run a tunnel, e.g.  cloudflared tunnel --url http://localhost:8000\n"
-    )
-    sys.stderr.write("   leave this terminal running · Ctrl-C to stop\n")
+    if transport == "stdio":
+        sys.stderr.write("✅ MCP server READY — stdio transport (local)\n")
+        sys.stderr.write(
+            "   Claude Code talks to this over stdin/stdout — there is no URL, and if\n"
+        )
+        sys.stderr.write(
+            "   you ran it by hand it just waits silently. That's correct for stdio.\n"
+        )
+    else:
+        sys.stderr.write(
+            "✅ MCP server READY — streamable-http on 0.0.0.0:8000  (served at /mcp)\n"
+        )
+        sys.stderr.write("   local:       http://127.0.0.1:8000/mcp\n")
+        sys.stderr.write(f"   same Wi-Fi:  http://{lan_ip()}:8000/mcp\n")
+        sys.stderr.write(
+            "   public:      run a tunnel, e.g.  cloudflared tunnel --url http://localhost:8000\n"
+        )
+        sys.stderr.write("   leave this terminal running · Ctrl-C to stop\n")
     sys.stderr.write("=" * 70 + "\n\n")
     sys.stderr.flush()
 
 
 if __name__ == "__main__":
     # Task 1 = stdio (default). Task 2 = streamable-HTTP: run with `--http`.
-    if "--http" in sys.argv:
-        print_ready_banner()
-        mcp.run(transport="streamable-http")
-    else:
-        mcp.run()  # stdio — how Claude Code launches it in Task 1
+    transport = "streamable-http" if "--http" in sys.argv else "stdio"
+    print_ready_banner(transport)
+    mcp.run(transport=transport)

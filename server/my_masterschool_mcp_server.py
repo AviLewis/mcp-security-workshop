@@ -39,26 +39,36 @@ def lan_ip() -> str:
         s.close()
 
 
-def print_ready_banner() -> None:
-    """Friendly 'server is up' banner with the URLs a client can connect to.
+def print_ready_banner(transport: str) -> None:
+    """Print a 'server is up' banner tailored to the transport. Always prints.
 
-    Used in Task 2 (HTTP): call this right before mcp.run(transport="streamable-http").
-    Always write to stderr, never stdout — in stdio mode stdout carries the JSON-RPC protocol.
+    Always write to stderr, never stdout — in stdio mode stdout carries the JSON-RPC protocol,
+    so a stray print() there would corrupt it. stderr is safe (Claude Code shows it in MCP logs).
     """
     sys.stderr.write("\n" + "=" * 70 + "\n")
-    sys.stderr.write(
-        "✅ MCP server READY — streamable-http on 0.0.0.0:8000  (served at /mcp)\n"
-    )
-    sys.stderr.write("   local:       http://127.0.0.1:8000/mcp\n")
-    sys.stderr.write(f"   same Wi-Fi:  http://{lan_ip()}:8000/mcp\n")
-    sys.stderr.write("   leave this terminal running · Ctrl-C to stop\n")
+    if transport == "stdio":
+        sys.stderr.write("✅ MCP server READY — stdio transport (local)\n")
+        sys.stderr.write(
+            "   Claude Code talks to this over stdin/stdout — there is no URL, and if\n"
+        )
+        sys.stderr.write(
+            "   you ran it by hand it just waits silently. That's correct for stdio.\n"
+        )
+    else:
+        sys.stderr.write(
+            "✅ MCP server READY — streamable-http on 0.0.0.0:8000  (served at /mcp)\n"
+        )
+        sys.stderr.write("   local:       http://127.0.0.1:8000/mcp\n")
+        sys.stderr.write(f"   same Wi-Fi:  http://{lan_ip()}:8000/mcp\n")
+        sys.stderr.write("   leave this terminal running · Ctrl-C to stop\n")
     sys.stderr.write("=" * 70 + "\n\n")
     sys.stderr.flush()
 
 
 if __name__ == "__main__":
-    # Task 1: stdio — Claude Code launches this for you (no banner; stdio prints nothing).
-    # Task 2: add host="0.0.0.0", port=8000 to FastMCP above, then swap the line below to:
-    #             print_ready_banner()
-    #             mcp.run(transport="streamable-http")
-    mcp.run()  # stdio transport by default (local subprocess)
+    # Task 1: stdio. Task 2: change transport to "streamable-http" AND add
+    #         host="0.0.0.0", port=8000 to the FastMCP(...) call above.
+    # The banner adapts to whichever transport you pick, and always prints.
+    transport = "stdio"
+    print_ready_banner(transport)
+    mcp.run(transport=transport)
