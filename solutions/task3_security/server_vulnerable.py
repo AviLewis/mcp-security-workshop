@@ -1,8 +1,10 @@
-# ctf_server_vulnerable.py — DELIBERATELY INSECURE. Runs ONLY in the CTF sandbox.
+# server_vulnerable.py — YOUR Task 1–2 server (read_workspace_file + the count_lines tool you
+# add in Task 3), still naive. This is the Task 3 STARTING point: the answer key for "what your
+# own server looks like BEFORE you harden it." DELIBERATELY INSECURE.
 #
 # ⚠️  Safety box: fake secrets only. The path-traversal target (FLAG.txt) is a planted
 #     file just OUTSIDE the workspace — not a real system file. Command-injection proof
-#     is harmless (whoami). Stop this server when the CTF ends.
+#     is harmless (whoami). Stop this server when you're done.
 #
 # This server has the two server-fixable holes from the lecture, plus it can serve a
 # file whose CONTENTS carry a prompt-injection payload (the not-fully-fixable one):
@@ -14,7 +16,7 @@ import os
 import subprocess
 import sys
 
-mcp = FastMCP("ctf-vulnerable", host="0.0.0.0", port=8001)
+mcp = FastMCP("my_masterschool_mcp_server", host="0.0.0.0", port=8001)
 
 
 @mcp.tool()
@@ -41,12 +43,14 @@ def count_lines(filename: str) -> str:
 
 
 if __name__ == "__main__":
-    # Anchor to ctf-workspace so "the workspace" is well-defined and FLAG.txt sits one level up.
-    os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ctf-workspace"))
+    # Anchor to workspace/ so "the workspace" is well-defined and FLAG.txt sits one level up.
+    os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "workspace"))
     transport = (
         "streamable-http" if (len(sys.argv) > 1 and sys.argv[1] == "http") else "stdio"
     )
     if transport == "streamable-http":
-        sys.stderr.write("[server] CTF VULNERABLE server on http://0.0.0.0:8001/mcp\n")
+        sys.stderr.write(
+            "[server] VULNERABLE server (Task 3 start) on http://0.0.0.0:8001/mcp\n"
+        )
         sys.stderr.flush()
     mcp.run(transport=transport)

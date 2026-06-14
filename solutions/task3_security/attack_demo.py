@@ -46,7 +46,7 @@ async def call(session, name, args):
 
 async def main(target: str) -> None:
     server_file = (
-        "ctf_server_hardened.py" if target == "hardened" else "ctf_server_vulnerable.py"
+        "server_hardened.py" if target == "hardened" else "server_vulnerable.py"
     )
     me = os.popen("whoami").read().strip()
     print(f"\n{'='*64}\n  Round A — attacking {server_file}\n{'='*64}")

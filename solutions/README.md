@@ -18,7 +18,9 @@ claude mcp add --transport stdio my_masterschool_mcp_server -- "$(which python)"
 cd solutions/server && python my_masterschool_mcp_server.py --http    # terminal A (then tunnel it, or use your LAN IP)
 cd solutions/server && python client_http_demo.py                     # terminal B, then Ctrl-C the server
 
-# Task 3 — attack, harden, prove
+# Task 3 — attack YOUR server, harden it, prove it. These are reference copies of your own
+#          server (read_workspace_file + count_lines), vulnerable vs hardened — you don't register
+#          them; they're the answer key + a runnable proof.
 cd solutions/task3_security
 python attack_demo.py            # vulnerable: flag1 LEAKED, flag2 PWNED, flag3 content returned
 python attack_demo.py hardened   # hardened:   flag1 & flag2 DEFENDED
@@ -34,7 +36,11 @@ python test_hardening.py         # 8/8 checks pass
 - `server/client_http_demo.py` — a stand-in "peer" client to test the network read solo.
 - `server/fake.env` + `server/workspace/` — the planted "secret" and the "normal" file: a partner's
   agent reads `workspace/README.md`, then `fake.env` (which `list_workspace` never showed) — the boundary.
-- `task3_security/ctf_server_hardened.py` — the three defenses: path canonicalization +
+- `task3_security/server_vulnerable.py` — your server (read_workspace_file + the count_lines tool you
+  add in Task 3), still naive — the Task 3 starting point.
+- `task3_security/server_hardened.py` — the same server, holes closed: path canonicalization +
   `is_relative_to`, no-shell argument arrays (`wc -l -- <path>`), and a human-in-the-loop gate on
   side-effectful actions. Prompt injection (flag 3) is intentionally **not** fully fixable here.
 - `task3_security/attack_demo.py` / `test_hardening.py` — the attack harness and the proof tests.
+- `task3_security/workspace/` + `task3_security/FLAG.txt` — the sandbox and the planted traversal
+  target (one level *outside* the workspace).

@@ -1,4 +1,4 @@
-# ctf_server_hardened.py — the SAME tools as the vulnerable server, holes closed.
+# server_hardened.py — YOUR server with the holes closed (the Round B answer key).
 #
 # 〰️ Gist the exact syntax. 🔍 Master WHY two vectors close and one cannot:
 #
@@ -14,9 +14,9 @@ import subprocess
 import sys
 
 HERE = Path(__file__).resolve().parent
-ALLOWED_ROOT = (HERE / "ctf-workspace").resolve()  # the one directory tools may touch
+ALLOWED_ROOT = (HERE / "workspace").resolve()  # the one directory tools may touch
 
-mcp = FastMCP("ctf-hardened", host="0.0.0.0", port=8001)
+mcp = FastMCP("my_masterschool_mcp_server", host="0.0.0.0", port=8001)
 
 
 def _safe_target(path: str) -> Path:
@@ -85,6 +85,8 @@ if __name__ == "__main__":
         "streamable-http" if (len(sys.argv) > 1 and sys.argv[1] == "http") else "stdio"
     )
     if transport == "streamable-http":
-        sys.stderr.write("[server] CTF HARDENED server on http://0.0.0.0:8001/mcp\n")
+        sys.stderr.write(
+            "[server] HARDENED server (Round B) on http://0.0.0.0:8001/mcp\n"
+        )
         sys.stderr.flush()
     mcp.run(transport=transport)
