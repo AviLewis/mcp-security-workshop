@@ -1,7 +1,8 @@
 # my_masterschool_mcp_server.py — read every line; understand it before you run it.
 #
 # This is the Task 1 starter. You will NOT generate it with an agent — you read it,
-# run it, and change it. It exposes ONE tool over the stdio transport.
+# run it, and change it. It exposes ONE tool and runs over stdio (Task 1), or over
+# streamable-HTTP when you launch it with the --http flag (Task 2).
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 import os
@@ -12,8 +13,8 @@ import sys
 os.chdir(Path(__file__).resolve().parent)
 
 mcp = FastMCP(
-    "my_masterschool_mcp_server"
-)  # the SERVER object the host will connect to
+    "my_masterschool_mcp_server", host="0.0.0.0", port=8000
+)  # host/port are used only for --http (Task 2); stdio (Task 1) ignores them
 
 
 @mcp.tool()  # this decorator is what makes the function DISCOVERABLE
@@ -66,9 +67,10 @@ def print_ready_banner(transport: str) -> None:
 
 
 if __name__ == "__main__":
-    # Task 1: stdio. Task 2: change transport to "streamable-http" AND add
-    #         host="0.0.0.0", port=8000 to the FastMCP(...) call above.
-    # The banner adapts to whichever transport you pick, and always prints.
-    transport = "stdio"
+    # Task 1: stdio (default) — Claude Code launches it this way.
+    # Task 2: run it yourself WITH the --http flag to serve over streamable-HTTP:
+    #             python server/my_masterschool_mcp_server.py --http
+    # (Without --http it runs stdio and opens NO port — the #1 "can't connect" cause.)
+    transport = "streamable-http" if "--http" in sys.argv else "stdio"
     print_ready_banner(transport)
     mcp.run(transport=transport)

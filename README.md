@@ -145,32 +145,29 @@ reads whatever the **process** can read. You can expose it two ways — on your 
 **tunnel**. Either way the boundary is the same: your file-reader is now reachable by another
 machine's agent.
 
-1. **Reuse your Task 1 server, then swap its transport** (agent-assisted is fine — "gist" level).
-   The server you put on the network is the **same file-reading server you built in Task 1**
-   (`read_workspace_file`, `list_workspace`, `name`) in the same `server/` folder — you don't copy
-   or recreate it, you just change how it's reached. Ask your agent:
-   > "Change my MCP server to **streamable HTTP** on host `0.0.0.0`, port `8000`, served at `/mcp`."
-
-   Two edits: add `host="0.0.0.0", port=8000` to the `FastMCP(...)` call, and set
-   `transport = "streamable-http"` in `__main__`. Then **run the server and leave it running in its
-   own terminal** (it `os.chdir`s to its own folder, so launch it from anywhere):
+1. **Put your Task 1 server on the network — launch it with `--http`.** It's the **same file-reading
+   server you built in Task 1** (`read_workspace_file`, `list_workspace`, `name`) in the same
+   `server/` folder — no new server, no edits. It already supports both transports; the `if "--http"
+   in sys.argv` line in `__main__` flips it to **streamable-HTTP on `0.0.0.0:8000`**:
    ```bash
-   source .venv/bin/activate                       # new terminal? activate first, or `python` won't be found
-   python server/my_masterschool_mcp_server.py     # prints a READY banner with URLs; Ctrl-C to stop
+   source .venv/bin/activate                              # new terminal? activate first, or `python` won't be found
+   python server/my_masterschool_mcp_server.py --http     # ← the --http flag = HTTP. Leave it running.
+   #   WITHOUT --http it runs stdio and opens NO port — the #1 "can't connect to :8000" cause.
    # stale/duplicate server, or port 8000 stuck? kill every copy and start fresh:
    pkill -f my_masterschool_mcp_server
    ```
-   It keeps running and listening — *this* is the process a partner (or you) connects to in steps 2–3.
-   "The workspace" stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file)
-   **and** `fake.env` (the planted secret that `list_workspace` never shows).
+   You'll see the `✅ … streamable-http … Uvicorn running on http://0.0.0.0:8000` banner and it holds
+   the terminal — *this* is the process a partner (or you) connects to in steps 2–3. "The workspace"
+   stays `server/`, so a remote agent reaches `workspace/README.md` (a normal file) **and** `fake.env`
+   (the planted secret that `list_workspace` never shows).
 
    > **Your server prints a startup banner.** `__main__` already calls `print_ready_banner(transport)`,
    > which **always prints** a clear "✅ server READY" line tailored to the transport — a "stdio, no
    > URL" note in Task 1, your localhost + LAN URLs in Task 2. It writes to **`sys.stderr`**, never
    > `print()` (stdout carries the protocol in stdio mode), so it's safe either way.
 
-   > **What you're actually doing:** same server, same tools — you're only swapping the *transport*
-   > (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
+   > **What you're actually doing:** same server, same tools — the `--http` flag only switches the
+   > *transport* (the channel the MCP messages ride on). Task 1 used **stdio**: Claude Code spawned your script as
    > a local subprocess and spoke over its private stdin/stdout pipe, so only this machine could reach
    > it. **Streamable HTTP** instead runs your server as a long-lived web server listening on a network
    > port, so any HTTP client can connect to it by URL. `host="0.0.0.0"` = accept connections on every
@@ -178,12 +175,11 @@ machine's agent.
    > path the protocol is served at. That's also why *you* start it now and leave it running — with
    > stdio, Claude Code launched it on demand.
 
-   > **🩺 A client says "unable to connect" to `:8000`?** Your server is running on **stdio**, which
-   > opens **no port** — so there's nothing on 8000. (Its banner even says "stdio transport … there is
-   > no URL.") Do the swap above (`host="0.0.0.0", port=8000` + `transport="streamable-http"`); the
-   > banner then shows your URLs and the server keeps listening on `0.0.0.0:8000`. Confirm with
-   > `lsof -nP -iTCP:8000 -sTCP:LISTEN` (should show your `python`). Clear stray stdio servers you
-   > started by hand with `pkill -f my_masterschool_mcp_server`.
+   > **🩺 A client says "unable to connect" to `:8000`?** You launched the server **without `--http`**,
+   > so it's running on **stdio** — which opens **no port** (its banner even says "stdio transport …
+   > there is no URL"). Stop it and re-run **with `--http`**; the banner then shows your URLs and it
+   > keeps listening on `0.0.0.0:8000`. Confirm with `lsof -nP -iTCP:8000 -sTCP:LISTEN` (should show
+   > your `python`). Clear stray servers with `pkill -f my_masterschool_mcp_server`.
 
 2. **Expose it — default to your local Wi-Fi network.** Both paths below serve the same `/mcp` over
    the same HTTP transport, but **(a) the local network is the default for this workshop** — simplest,
