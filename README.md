@@ -233,6 +233,7 @@ machine's agent.
    use the tunnel URL only if you're not on the same network. **Note the `/mcp` path:**
    ```bash
    claude mcp add --transport http partner-box http://<YOUR-LAN-IP>:8000/mcp
+   # Example: claude mcp add --transport http partner-box http://127.0.0.1:8000/mcp
    # not on the same network? use your tunnel's URL (always add the /mcp path):
    #   cloudflared:  claude mcp add --transport http partner-box https://<rand>.trycloudflare.com/mcp
    #   ngrok:        claude mcp add --transport http partner-box https://<rand>.ngrok-free.app/mcp
