@@ -57,7 +57,7 @@ Keep this venv activated for the rest of the workshop (so `python` and `claude m
 
 ---
 
-## Task 1 — Meet MCP by hand (stdio, local)
+## Task 1 — Meet MCP by hand (Run Local MCP server)
 
 **Goal (🔍 master this):** be able to narrate the request loop unaided —
 *your prompt → client lists tools → agent picks one → client invokes it with arguments →
