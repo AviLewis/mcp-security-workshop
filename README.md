@@ -207,10 +207,16 @@ machine's agent.
    > OS firewall must allow inbound TCP **8000** (macOS may prompt "accept incoming connections?" the
    > first time — click **Allow**). Nothing leaves your LAN — no internet round-trip.
 
-   > **On a VPN / corporate network?** If the commands above print nothing (or only a `192.0.0.x` /
-   > `100.x` tunnel address), you have no real LAN — device-to-device won't work. Either drop off the
-   > VPN onto plain Wi-Fi, use a **tunnel** (b), or just test solo against `http://127.0.0.1:8000/mcp`
-   > (localhost always works, no LAN IP needed).
+   > **On a VPN / corporate network? (no usable LAN IP)** If `ipconfig getifaddr en0`/`en1` print
+   > nothing and `ifconfig | grep "inet "` shows only an address like `192.0.0.2` (or `100.x`) with
+   > `netmask 0xffffffff` and `broadcast` equal to itself, that's a **VPN/tunnel address — a `/32`
+   > point-to-point link, not a LAN IP.** A partner on your Wi-Fi can't reach it. Options:
+   > - **Solo / just to see it work:** use `http://127.0.0.1:8000/mcp` — localhost always works, no
+   >   LAN IP needed. (Your server's banner may show the tunnel addr on its `same Wi-Fi:` line —
+   >   ignore it; use the `local:` line.)
+   > - **Real two-machine demo:** drop off the VPN onto plain Wi-Fi (then `ipconfig getifaddr en0`
+   >   shows a real `192.168.x.x`), or use a **tunnel** (b) — though tunnels are flaky behind a
+   >   corporate proxy.
 
    **(b) Public internet — a tunnel (only if you're *not* on the same network).** To cross
    NAT/firewalls or hand out a public URL, run one tunnel (you only need one); each prints a public
