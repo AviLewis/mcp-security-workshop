@@ -1,0 +1,5 @@
+FLAG{path_traversal_pwned}
+
+If your agent read this through your MCP server, then read_workspace_file was never
+confined to your server's folder. This file lives ONE LEVEL ABOVE server/ on purpose —
+reaching it with "../FLAG.txt" is the whole path-traversal exploit.

@@ -17,10 +17,10 @@ Hands-on starter kit for the **MCP & Security** workshop. You'll build a real MC
 ## What's here
 
 ```
-server/             ← YOUR server, reused across Task 1 & 2: my_masterschool_mcp_server.py
-                       (one tool to start) + workspace/notes.txt (explains the MCP loop when
-                       you read it) + a planted fake.env (the "secret" Task 2 exposes)
-task3_security/     ← Task 3 CTF: a vulnerable server to attack, then harden
+server/             ← YOUR server, reused across ALL three tasks: my_masterschool_mcp_server.py
+                       (one tool to start) + workspace/ (notes.txt, README.md, meeting_notes.txt)
+                       + a planted fake.env (the "secret" Task 2 exposes; Task 3 attacks this server)
+FLAG.txt            ← Task 3 path-traversal target — planted just OUTSIDE server/
 solutions/          ← ⛔ SPOILERS — the finished, runnable version of all three tasks
 ```
 
@@ -257,56 +257,70 @@ sentence the boundary you crossed.
 
 ---
 
-## Task 3 — Break it, then close the door (CTF + harden)
+## Task 3 — Break it, then close the door (attack your *own* server, then harden)
 
-> ⚠️ **Safety box.** Attack **only** the provided `task3_security/` sandbox. Fake secrets only.
-> The path-traversal target `FLAG.txt` is a planted file just *outside* `ctf-workspace/`.
-> Command-injection proof is harmless (`whoami`). Stop the server when you're done.
+> ⚠️ **Safety box.** Everything here targets **your own `server/`**, with **fake secrets only**
+> (`NOT_REAL_*`). The path-traversal target `FLAG.txt` is a planted file just *outside* `server/`.
+> The command-injection proof is harmless (`whoami`). Never point these tools at real files, and
+> stop the server when you're done.
 
-### Round A — attack
-**Register the CTF server first — it's a *new* server, not your Task 2 `partner-box`.** The planted
-`ctf-vulnerable` serves out of `task3_security/ctf-workspace/`, with `FLAG.txt` sitting one level up
-(that's why the traversal target is `../FLAG.txt`):
-```bash
-# stdio, local (simplest) — run from the repo root, venv active:
-claude mcp add --transport stdio ctf-vulnerable -- \
-  "$(which python)" "$(pwd)/task3_security/ctf_server_vulnerable.py"
-#   /mcp  → you should see ctf-vulnerable's tools: read_workspace_file, count_lines
+This is the **same server you built and exposed in Tasks 1–2** — no new server to register. The
+holes were there all along; now you exploit them, then close them.
 
-# …or HTTP (to attack across machines) — this server listens on port 8001:
-#   python task3_security/ctf_server_vulnerable.py http
-#   claude mcp add --transport http ctf-box http://<HOST-LAN-IP>:8001/mcp
-```
-Point your agent at **`ctf-vulnerable`** (not `partner-box`). The server's working directory *is*
-`ctf-workspace/`, so attack paths are relative to it. For **each flag, write one line:
-"worked / didn't, because ___"** — that sentence is the point.
+### Round A — attack your own server
+Use the server you already have running/registered (stdio from Task 1, or HTTP from Task 2). Its
+working directory is `server/`, so attack paths are relative to that. For **each flag, write one
+line: "worked / didn't, because ___"** — that sentence is the point.
 
-| 🚩 | Vector | Try (on `ctf-vulnerable`) | Proof |
+| 🚩 | Vector | Try (on your server) | Proof |
 |---|---|---|---|
-| 1 | **Path traversal** | `read_workspace_file("../FLAG.txt")` | you read a file outside the workspace |
-| 2 | **Command injection** | `count_lines("notes.txt; whoami")` | the injected `whoami` runs |
-| 3 | **Indirect prompt injection** | have the agent read `meeting_notes.txt` and "summarize" it | the agent obeys instructions hidden in the file's *contents* |
+| 1 | **Path traversal** | `read_workspace_file("../FLAG.txt")` | you read `FLAG{…}` — a file *outside* `server/` |
+| 2 | **Command injection** | `count_lines("workspace/notes.txt; whoami")` | the injected `whoami` runs |
+| 3 | **Indirect prompt injection** | have the agent read `workspace/meeting_notes.txt` and "summarize" it | the agent obeys instructions hidden in the file's *contents* |
+
+**Flag 1 is already exploitable** — `read_workspace_file` has done a naive `open(path)` since Task 1,
+so `../FLAG.txt` sails straight out of `server/`. (In Task 2 you saw the milder version: it read
+`fake.env`, just outside the `workspace/` sandbox. Same hole, bigger blast radius.)
+
+**Flag 2 needs a tool first** — your server has no shell-exec tool yet. Add a deliberately convenient
+(and unsafe) one by hand, the way you added `name`/`list_workspace`:
+```python
+import subprocess  # at the top of the file
+
+@mcp.tool()
+def count_lines(filename: str) -> str:
+    """Count the lines in a workspace file."""
+    out = subprocess.run(f"wc -l {filename}", shell=True, capture_output=True, text=True)  # VULN: shell=True
+    return (out.stdout or "") + (out.stderr or "")
+```
+Reconnect, then `count_lines("workspace/notes.txt; whoami")` — `shell=True` runs the injected
+`whoami` too. (The lesson: a handy "just shell out to `wc`" tool is a remote-code-execution hole.)
 
 *Flag 3 note:* modern Claude often **resists** naive injections — that's a feature and a teaching
 moment. If it doesn't fire, ask: *why did the defense hold, and what would a determined attacker change?*
 
-### Round B — harden your own server (agent-assisted, but read the diff)
-Ask your agent to:
+### Round B — close the doors (agent-assisted, but read the diff)
+Ask your agent to harden **your** server:
 > "Harden this server: (1) confine `read_workspace_file` to one allowed root by canonicalizing the
-> path and rejecting anything outside it; (2) remove any `shell=True`, use argument arrays;
-> (3) document that tool output is untrusted and require confirmation before side-effectful actions.
-> Write tests proving the Round-A attacks fail."
+> path and rejecting anything outside it; (2) rewrite `count_lines` with no `shell=True` — use an
+> argument array; (3) document that tool output is untrusted and require confirmation before
+> side-effectful actions. Write tests proving the Round-A attacks fail."
 
 The single most important diff — the path-traversal patch. Read it and be able to explain why
 `is_relative_to` kills `../` (and why a naive `str.startswith` check would **not**):
 ```python
 from pathlib import Path
-ALLOWED_ROOT = Path("./ctf-workspace").resolve()
+ALLOWED_ROOT = Path(__file__).resolve().parent       # confine tools to the server's own folder
 
-target = (ALLOWED_ROOT / path).resolve()      # collapses ../ AND follows symlinks
-if not target.is_relative_to(ALLOWED_ROOT):   # blocks traversal — component-wise, not string-prefix
-    raise ValueError("Access denied: path escapes the workspace.")
+def _safe_target(path: str) -> Path:
+    target = (ALLOWED_ROOT / path).resolve()         # collapses ../ AND follows symlinks
+    if not target.is_relative_to(ALLOWED_ROOT):      # blocks traversal — component-wise, not string-prefix
+        raise ValueError("Access denied: path escapes the workspace.")
+    return target
 ```
+Then read with `_safe_target(path).read_text()`, and make `count_lines` pass an **argument array** —
+`subprocess.run(["wc", "-l", "--", str(_safe_target(filename))])` — so an injected `;` stays part of
+one filename and never reaches a shell.
 
 Re-run Round A: flags 1 & 2 should fail cleanly; flag 3 is the discussion.
 
