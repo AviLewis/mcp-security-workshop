@@ -263,8 +263,7 @@ machine's agent.
 **Rehearse solo (no partner)?** Be the "peer" client against your own server:
 `python solutions/server/client_http_demo.py http://127.0.0.1:8000/mcp`.
 
-✅ **Checkpoint:** a partner's agent read a file on your machine **and** you can state in one
-sentence the boundary you crossed.
+✅ **Checkpoint:** a partner's agent read a file on your machine.
 
 ---
 
@@ -342,6 +341,10 @@ def count_lines(filename: str) -> str:
     out = subprocess.run(f"wc -l {filename}", shell=True, capture_output=True, text=True)
     return (out.stdout or "") + (out.stderr or "")
 ```
+(`wc -l <file>` is the Unix "word count" command run with `-l` = count **l**ines, so the tool just
+shells out to count a file's lines. The bug is `shell=True`: it hands `wc -l <filename>` to a shell as
+one string, so a `;` in `filename` starts a *second* command.)
+
 **Restart + reconnect** (the 🔁 note above — you just changed the code), predict, then run **one** call:
 `count_lines("workspace/notes.txt; whoami")`. Did the injected `whoami` run? Record it. (You just
 authored a remote-code-execution hole in your own server — every tool you expose is an attack surface.)
