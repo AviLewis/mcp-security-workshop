@@ -3,8 +3,9 @@
 Your agent fills this in **with you, as you attack**: before each attack it asks your **prediction**,
 runs the one call, then asks **why** it happened — and logs your prediction + result + "because" here
 (you'll see it say "Logged Flag N → MY_FINDINGS.md"). The words are yours; edit directly any time.
-The **Because** line is the graded part — 1–2 sentences in your own words: name the vulnerability
-class, and say which boundary failed. Then swap with your Task 2 partner and check each other's lines.
+The **Because** line is what matters — 1–2 sentences in your own words: name the vulnerability
+class, and say which boundary failed. Then swap with your Task 2 partner and sanity-check each
+other's lines.
 
 (Example of a good block — replace with your own:)
 > ## Flag 1 — path traversal

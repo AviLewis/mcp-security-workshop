@@ -21,7 +21,7 @@ CLAUDE.md           ← ground rules that keep your agent a lab instrument you d
 server/             ← YOUR server, reused across all three tasks: my_masterschool_mcp_server.py
                        + workspace/ (notes.txt, README.md, meeting_notes.txt) + a planted example.env
 FLAG.txt            ← a planted file just OUTSIDE server/ (you'll meet it in Task 3)
-MY_FINDINGS.md      ← Task 3 worksheet — fill one block per flag (your graded deliverable)
+MY_FINDINGS.md      ← Task 3 worksheet — fill one block per flag (your write-up of what you found)
 solutions/          ← ⛔ SPOILERS — the finished, runnable version of all three tasks
 ```
 
@@ -316,8 +316,8 @@ reachable* — is the boundary Round A blows wide open.
   Because: Path traversal (CWE-22). The sandbox boundary failed: open() honors any path the process
            can reach, so "../" walks out of server/. A scoped list_workspace gave false confidence.
   ```
-  Three blocks total. Then swap files with your Task 2 partner and check each other's "Because" lines —
-  **that's the grade: can you *explain* it, not just land it.**
+  Three blocks total. Then swap files with your Task 2 partner and sanity-check each other's "Because"
+  lines — **the whole point is to *explain* it, not just land it.**
 
 ### Round A — attack (do all three, in order)
 Run against your own server (or a partner's `partner-box`, per "who does what" above). The server's
